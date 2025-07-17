@@ -355,6 +355,7 @@ function MovieDetails() {
                   </button>
                 </div>
                 {showTrailer && (
+                  
                   <div className="relative w-full max-w-2xl">
                     <div className="relative pb-[56.25%] h-0 overflow-hidden rounded-lg shadow-lg border">
                       <iframe

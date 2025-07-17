@@ -5,9 +5,11 @@ import WatchList from './components/WatchList';
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'
+import {  LoadingProvider } from './context/LoadingContext';
 
 createRoot(document.getElementById('root')).render(
-  <WatchlistProvider>       {/* ⬅️ wrap once, anywhere above the Routes */}
+  <WatchlistProvider> 
+    <LoadingProvider>     
     <BrowserRouter>
       <Routes>
         <Route path="/"           element={<App />} />
@@ -16,5 +18,6 @@ createRoot(document.getElementById('root')).render(
         <Route path="/watchlist"  element={<WatchList />} />
       </Routes>
     </BrowserRouter>
+    </LoadingProvider>  
   </WatchlistProvider> 
 )

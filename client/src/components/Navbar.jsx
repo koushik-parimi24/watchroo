@@ -1,11 +1,14 @@
-import React from 'react'
-import { useState,useEffect,useContext } from 'react';
-import {supabase} from "@/lib/supabaseClient.js";
-import { Link, useNavigate } from 'react-router-dom'; 
-import { WatchlistContext } from '@/context/WatchlistContext'; //
+import React, { useState, useEffect, useContext } from 'react';
+import { supabase } from '@/lib/supabaseClient.js';
+import { Link, useNavigate } from 'react-router-dom';
+import { WatchlistContext } from '@/context/WatchlistContext';
+
 const Navbar = () => {
-   const { watchlist } = useContext(WatchlistContext);
-      useEffect(() => {
+  const { watchlist } = useContext(WatchlistContext);
+  const [session, setSession] = useState([]);
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
     });
@@ -28,40 +31,61 @@ const Navbar = () => {
   const handleLogout = async () => {
     await supabase.auth.signOut();
   };
-      const [session, setSession] = useState([]);
+
   return (
-    <nav className="fixed top-0 left-0 w-full px-6 py-4 bg-black/30 backdrop-blur-md flex justify-between z-50">
+    <nav className="fixed top-0 left-0 w-full bg-black/30 backdrop-blur-md z-50 px-4 py-3">
+      <div className="flex flex-wrap justify-between items-center">
+        {/* Logo and Title */}
+        <Link to="/" className="flex items-center gap-2 mb-2 sm:mb-0">
+          <img src="/headerlogo.png" alt="Logo" className="w-[40px] h-[40px]" />
+          <h1 className="text-xl font-bold text-white">Watchroo</h1>
+        </Link>
 
-    <Link to="/" className="flex items-center space-x-3">
-    <img src="/headerlogo.png" alt="Logo" className="w-[50px] h-[40px]" />
-    <h1 className="text-2xl font-bold text-white">Watchroo</h1>
-    </Link>
-  <div className="relative">
-    <Link to="/watchlist">
-      <svg width="28" height="28" className="text-amber-600 hover:scale-110 transition" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M5 3c-1.1 0-2 .9-2 2v16l9-4 9 4V5c0-1.1-.9-2-2-2H5z" />
-      </svg>
-      {watchlist.length > 0 && (
-        <span className="absolute -top-1 -right-1 bg-red-600 rounded-full w-5 h-5 text-[10px] flex items-center justify-center text-white">
-          {watchlist.length}
-        </span>
-      )}
-    </Link>
-  </div>
-    {session?.user ? (
-        <div className="flex items-center gap-4">
-          <span className="text-sm text-white">Hi, {session.user.email.split('@')[0]}</span>
-          <button onClick={handleLogout} className="bg-red-500 px-4 py-1 rounded hover:bg-red-100 transition-all duration-200 ease-linear">
-            Logout
-          </button>
+        {/* Right Side: Login/Logout + Watchlist */}
+        <div className="flex items-center gap-4 text-white">
+          {/* Watchlist Icon */}
+          <div className="relative">
+            <Link to="/watchlist">
+              <svg
+                width="26"
+                height="26"
+                className="text-amber-500 hover:scale-110 transition"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+              >
+                <path d="M5 3c-1.1 0-2 .9-2 2v16l9-4 9 4V5c0-1.1-.9-2-2-2H5z" />
+              </svg>
+              {watchlist.length > 0 && (
+                <span className="absolute -top-1 -right-2 bg-red-600 rounded-full w-5 h-5 text-[10px] flex items-center justify-center text-white">
+                  {watchlist.length}
+                </span>
+              )}
+            </Link>
+          </div>
+
+          {/* User Section */}
+          {session?.user ? (
+            <>
+              <span className="text-sm hidden sm:inline">Hi, {session.user.email.split('@')[0]}</span>
+              <button
+                onClick={handleLogout}
+                className="bg-red-500 px-3 py-1 text-sm rounded hover:bg-red-400 transition"
+              >
+                Logout
+              </button>
+            </>
+          ) : (
+            <button
+              onClick={handleLogin}
+              className="bg-blue-600 px-3 py-1 text-sm rounded hover:bg-blue-500 transition"
+            >
+              Login
+            </button>
+          )}
         </div>
-    ) : (
-        <button onClick={handleLogin} className="bg-blue-600 px-4 py-1 hover:bg-blue-100 rounded transition-all duration-200 ease-linear">
-          Login
-        </button>
-    )}
-  </nav>
-  )
-}
+      </div>
+    </nav>
+  );
+};
 
-export default Navbar
+export default Navbar;
