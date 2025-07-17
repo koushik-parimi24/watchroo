@@ -36,17 +36,17 @@ const Navbar = () => {
     <img src="/headerlogo.png" alt="Logo" className="w-[50px] h-[40px]" />
     <h1 className="text-2xl font-bold text-white">Watchroo</h1>
     </Link>
-  <div >
-        {/* watch‑list button */}
-        <Link to="/watchlist" >
-          {/* any icon you like */}
-          <svg width="28" height="28" className="text-amber-600 group-hover:scale-110 transition" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3c-1.1 0-2 .9-2 2v16l9-4 9 4V5c0-1.1-.9-2-2-2H5z"/></svg>
-          {watchlist.length > 0 && (
-            <span className="absolute -top-1 -right-1 bg-red-600 rounded-full w-5 h-5 text-[10px] flex items-center justify-center">
-              {watchlist.length}
-            </span>
-          )}
-        </Link>
+  <div className="relative">
+    <Link to="/watchlist">
+      <svg width="28" height="28" className="text-amber-600 hover:scale-110 transition" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M5 3c-1.1 0-2 .9-2 2v16l9-4 9 4V5c0-1.1-.9-2-2-2H5z" />
+      </svg>
+      {watchlist.length > 0 && (
+        <span className="absolute -top-1 -right-1 bg-red-600 rounded-full w-5 h-5 text-[10px] flex items-center justify-center text-white">
+          {watchlist.length}
+        </span>
+      )}
+    </Link>
   </div>
     {session?.user ? (
         <div className="flex items-center gap-4">

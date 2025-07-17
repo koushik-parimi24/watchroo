@@ -3,7 +3,7 @@ import './App.css'
 import Search from './components/Search'
 import {useEffect, useState } from 'react'
 import MovieCard from './components/MovieCard'
-import {supabase} from "@/lib/supabaseClient.js";
+
 import Navbar from './components/Navbar';
 
 const API_KEY = import.meta.env.VITE_TMDB_API_KEY
@@ -26,32 +26,10 @@ function App() {
   const [topTvShow, setTopTvShows] = useState([]);
   const [tvShows, setTvShows] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
-  const [session, setSession] = useState([]);
 
 
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-    });
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-    });
 
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, []);
-
-  const handleLogin = async () => {
-    await supabase.auth.signInWithOAuth({ provider: 'google' });
-  };
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-  };
 
   const handleSearch = async() =>{
   if(!searchTerm.trim()){
