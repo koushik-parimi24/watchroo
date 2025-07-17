@@ -1,3 +1,4 @@
-Source: /.* 
-Destination: /index.html 
-Status: 200
+routes:
+  - type: rewrite
+    source: /.*
+    destination: /index.html
