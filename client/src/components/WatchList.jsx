@@ -2,12 +2,13 @@ import { useContext } from 'react';
 import { WatchlistContext } from '@/context/WatchlistContext';
 import MovieCard from './MovieCard';
 import { Link } from 'react-router-dom';
-
+import Navbar from './Navbar';
 const WatchList = () => {
   const { watchlist } = useContext(WatchlistContext);
 
   return (
     <main className="pt-28 px-6 min-h-screen bg-gradient-to-b from-black via-gray-900 to-black">
+      <Navbar/>
       <h2 className="text-3xl font-bold text-white mb-6">My Watchlist</h2>
 
       {watchlist.length === 0 ? (
