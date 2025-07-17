@@ -7,34 +7,35 @@ const MovieCard = ({ movie }) => {
   const { watchlist, add, remove } = useContext(WatchlistContext);
   const [saved, setSaved] = useState(false);
 
-  /* keep local state in sync */
-  useEffect(() => {
-    setSaved(watchlist.some((w) => w.media_id === movie.id));
-  }, [watchlist, movie.id]);
+  // Normalize values
+  const id = movie.id ?? movie.media_id;
+  const mediaType = movie.media_type ?? (movie.title ? 'movie' : 'tv');
+  const title = movie.original_title || movie.original_name || movie.title || movie.name;
+  const date = movie.release_date || movie.first_air_date || 'Unknown';
+  const rating = movie.vote_average ?? 'N/A';
 
-  const title = movie.original_title || movie.original_name;
-  const date  = movie.release_date    || movie.first_air_date;
-  const type  = movie.media_type ?? (movie.title ? 'movie' : 'tv');
+  useEffect(() => {
+    setSaved(watchlist.some((w) => w.media_id === id));
+  }, [watchlist, id]);
 
   return (
     <div className="relative">
-      <Link to={`/${type}/${movie.id}`} className="block">
+      <Link to={`/${mediaType}/${id}`} className="block">
         <div className="bg-white/10 backdrop-blur-md border border-white/20 p-4 rounded-2xl shadow-lg hover:shadow-2xl transition">
           <img
             src={movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : '/placeholder.png'}
             alt={title}
             className="w-full h-72 object-cover rounded"
           />
-          <h3 className="text-white mt-3 font-bold text-lg">{title}</h3>
+          <h3 className="text-white mt-3 font-bold text-lg line-clamp-1 overflow-hidden">{title}</h3>
           <p className="text-gray-400 text-sm">Release: {date}</p>
-          <p className="text-blue-400 text-xs italic">{type === 'tv' ? 'TV Show' : 'Movie'}</p>
-          <p className="text-yellow-400 text-sm">⭐ {movie.vote_average}</p>
+          <p className="text-blue-400 text-xs italic">{mediaType === 'tv' ? 'TV Show' : 'Movie'}</p>
+          <p className="text-yellow-400 text-sm">⭐ {rating}</p>
         </div>
       </Link>
 
-      {/* add / remove button */}
       <button
-        onClick={() => (saved ? remove(movie.id) : add(movie))}
+        onClick={() => (saved ? remove(id) : add(movie))}
         className="absolute top-3 right-3 bg-amber-50 p-2 rounded-full hover:bg-amber-400"
       >
         {saved ? <BookmarkCheck size={20} /> : <Bookmark size={20} />}
