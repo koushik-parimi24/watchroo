@@ -29,10 +29,12 @@ function MovieDetails() {
 
   const [seasonData, setSeasonData] = useState(null);
   const [loadingSeason, setLoadingSeason] = useState(false);
+  
 
   /* -------------------- DERIVED -------------------- */
   const isTV = location.pathname.startsWith('/tv');
   const type = isTV ? 'tv' : 'movie';
+  
 
   /* -------------------- FETCH ITEM DETAILS -------------------- */
   useEffect(() => {
@@ -151,17 +153,17 @@ function MovieDetails() {
 
   /* -------------------- RENDER -------------------- */
   return (
-    <div className="p-6 text-foreground mx-auto pt-24 min-h-screen bg-blue-200">
+    <div className="p-6 text-foreground mx-auto pt-24 min-h-screen">
       <div className="flex flex-col gap-6">
         <Navbar />
 
         {/* ------------ PLAYER SECTION ------------ */}
         <div className="w-full">
           <div className="flex items-center gap-4 mb-4">
-            <h1 className="text-3xl font-bold">{title}</h1>
+            <h1 className="text-3xl font-bold text-white">{title}</h1>
             <button
               onClick={() => setShowPlayer((p) => !p)}
-              className="bg-primary text-primary-foreground px-6 py-3 rounded hover:bg-primary/90 transition font-semibold"
+              className="bg-violet-200 px-6 py-3 rounded hover:bg-violet-500 transition font-semibold "
             >
               {showPlayer ? 'Hide Player' : '▶️ Watch Now'}
             </button>
@@ -174,7 +176,7 @@ function MovieDetails() {
                   <iframe
                     src={getCurrentStreamUrl()}
                     title={`Watch ${title}`}
-                    className="absolute top-0 left-0 w-full h-full"
+                    className="absolute top-0 left-0 w-full h-full "
                     frameBorder="0"
                     allowFullScreen
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -190,7 +192,7 @@ function MovieDetails() {
 
               {/* ---- SERVER SELECTION ---- */}
               <div className="mt-6">
-                <h3 className="text-lg font-semibold mb-3">Choose Server:</h3>
+                <h3 className="text-lg font-semibold mb-3 text-teal-50">Choose Server:</h3>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                   {Object.entries(streamingServers).map(([key, srv]) => (
                     <button
@@ -198,11 +200,11 @@ function MovieDetails() {
                       onClick={() => setSelectedServer(key)}
                       className={`p-3 rounded-lg border transition-all text-sm ${
                         selectedServer === key
-                          ? 'bg-primary text-primary-foreground border-primary'
-                          : 'bg-card text-card-foreground border-border hover:bg-accent hover:text-accent-foreground'
+                          ? 'bg-blue-400 text-primary-foreground border-primary'
+                          : 'bg-card text-card-foreground border-border  hover:text-accent-foreground'
                       }`}
                     >
-                      <div className="font-medium">{srv.name}</div>
+                      <div className="font-medium ">{srv.name}</div>
                       <div className="text-xs opacity-75 mt-1">
                         {srv.quality} • {srv.ads}
                       </div>
@@ -213,20 +215,19 @@ function MovieDetails() {
             </div>
           )}
         </div>
-
         {/* ------------ INFO SECTION ------------ */}
-        <div className="flex flex-col md:flex-row gap-6">
+        <div className="flex flex-col md:flex-row gap-6 text-teal-50 font-extralight">
           <img
             src={poster}
             alt={title}
-            className="w-48 h-72 object-cover rounded shadow-lg border-8"
+            className="w-48 h-72 object-cover rounded shadow-lg "
           />
 
           <div className="flex-1">
             <p className="text-sm text-muted-foreground mb-2">
               {date} • ⭐ {item.vote_average}/10
             </p>
-            <p className="mb-4 leading-loose text-card-foreground">
+            <p className="mb-4 leading-loose ">
               {item.overview}
             </p>
 
@@ -265,7 +266,6 @@ function MovieDetails() {
                 </div>
               )}
             </div>
-
             {/* ------------ TV SEASONS & EPISODES ------------ */}
             {isTV && item.seasons && (
               <div className="mb-6">
@@ -295,7 +295,6 @@ function MovieDetails() {
                       ))}
                   </div>
                 </div>
-
                 {/* ----- Episode Picker ----- */}
                 {seasonData?.episodes?.length > 0 && !loadingSeason && (
                   <div className="mb-4">
