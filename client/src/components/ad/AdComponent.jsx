@@ -1,7 +1,15 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
-const AdComponent = () => {
+const AdComponent = ({ adSlot }) => {
+  const adRef = useRef(null);
+
   useEffect(() => {
+    const adElem = adRef.current;
+    if (!adElem) return;
+
+    // Don't try to load the ad again if it was already initialized
+    if (adElem.getAttribute("data-adsbygoogle-status") === "done") return;
+
     try {
       (window.adsbygoogle = window.adsbygoogle || []).push({});
     } catch (e) {
@@ -11,10 +19,11 @@ const AdComponent = () => {
 
   return (
     <ins
+      ref={adRef}
       className="adsbygoogle"
       style={{ display: "block" }}
-      data-ad-client="ca-pub-9696968025004880"
-      data-ad-slot="YOUR_AD_SLOT_ID"
+      data-ad-client="ca-pub-3940256099942544"
+      data-ad-slot={adSlot}
       data-ad-format="auto"
       data-full-width-responsive="true"
     ></ins>
