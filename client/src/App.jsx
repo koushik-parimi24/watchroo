@@ -357,7 +357,7 @@ function App() {
 
               {/* Top TV Shows Section */}
               <h2 className='text-white text-2xl mb-4'>Top TV Shows</h2>
-              <AdComponent adSlot="1234567890" />
+              <AdComponent adSlot="1234567890" key="ad-1" />
               {initialLoading ? (
                 <SkeletonGrid count={8} className="py-4" />
               ) : (
@@ -370,7 +370,7 @@ function App() {
 
               {/* Popular Movies Section */}
               <h2 className='text-white text-2xl mb-4 py-6'>Popular Movies</h2>
-              <AdComponent adSlot="1234567890" />
+              <AdComponent adSlot="4982118881" key="ad-2"/>
               {initialLoading ? (
                 <SkeletonGrid count={12} className="py-8" />
               ) : (
