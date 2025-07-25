@@ -1,11 +1,12 @@
 import './App.css'
 import Search from './components/Search'
 import {useEffect, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import MovieCard from './components/MovieCard'
 import Navbar from './components/Navbar';
 import FilterPanel from './components/FilterPanel';
 import SkeletonGrid from './components/SkeletonGrid';
-import AdComponent from './components/ad/AdComponent';
+
 
 
 const API_KEY = import.meta.env.VITE_TMDB_API_KEY
@@ -20,6 +21,7 @@ const API_OPTIONS ={
 }
 
 function App() {
+  const [searchParams, setSearchParams] = useSearchParams(); 
   const [searchTerm, setSearchTerm] = useState('')
   const [errorMessage, setErrorMessage] = useState('')
   const [movies, setMovies] = useState([]);
@@ -58,6 +60,7 @@ function App() {
       setSearchLoading(true);
       setIsSearching(true);
       setIsFiltering(false);
+      setSearchParams({ search: searchTerm });
       
       const endpoint = `${API_URL_BASE}/search/multi?query=${encodeURIComponent(searchTerm)}`
       const response = await fetch(endpoint,API_OPTIONS);
@@ -91,7 +94,23 @@ function App() {
         sort_by: newFilters.sortBy,
         page: 1
       };
-
+ const clearFilters = () => {
+    setFilters({
+      genre: '',
+      sortBy: 'popularity.desc',
+      year: '',
+      rating: '',
+      mediaType: 'all'
+    });
+    setIsFiltering(false);
+    setIsSearching(false);
+    setSearchTerm('');
+    setSearchParams({}); // Clear URL params
+    setErrorMessage('');
+    fetchMovies();
+    fetchTvShows();
+  };  
+  
       // Add genre filter
       if (newFilters.genre) baseParams.with_genres = newFilters.genre;
       if (newFilters.rating) baseParams['vote_average.gte'] = newFilters.rating;
@@ -357,7 +376,7 @@ function App() {
 
               {/* Top TV Shows Section */}
               <h2 className='text-white text-2xl mb-4'>Top TV Shows</h2>
-              <AdComponent adSlot="1234567890" key="ad-1" />
+              
               {initialLoading ? (
                 <SkeletonGrid count={8} className="py-4" />
               ) : (
@@ -370,7 +389,7 @@ function App() {
 
               {/* Popular Movies Section */}
               <h2 className='text-white text-2xl mb-4 py-6'>Popular Movies</h2>
-              <AdComponent adSlot="4982118881" key="ad-2"/>
+              
               {initialLoading ? (
                 <SkeletonGrid count={12} className="py-8" />
               ) : (

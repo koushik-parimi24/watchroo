@@ -50,7 +50,7 @@ const MovieCard = ({ movie, isLoading = false }) => {
       <Link to={`/${mediaType}/${id}`} onClick={() => setIsLoading(true)} className="block">
         <div className="bg-white/10 backdrop-blur-md border border-white/20 p-4 rounded-2xl shadow-lg hover:shadow-2xl transition">
           {/* Image with loading state */}
-          <div className="relative w-full h-72 rounded overflow-hidden bg-gray-700">
+          <div className="relative w-full h-full rounded overflow-hidden bg-gray-700">
             {!imageLoaded && !imageError && (
               <div className="absolute inset-0 bg-gray-600/50 animate-pulse flex items-center justify-center">
                 <div className="w-8 h-8 border-2 border-white/20 border-t-white/60 rounded-full animate-spin"></div>
