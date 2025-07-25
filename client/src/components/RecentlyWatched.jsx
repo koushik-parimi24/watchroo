@@ -1,69 +1,48 @@
-// src/components/ContinueWatching.jsx
+// src/components/RecentlyWatched.jsx
 import { Link } from 'react-router-dom';
-import { useContinueWatching } from '@/context/ContinueWatchingContext';
+import { useRecentlyWatched } from '@/context/RecentlyWatchedContext';
 import { formatDistanceToNow } from 'date-fns';
 
-const ContinueWatching = () => {
-  const { continueWatching, removeFromWatching } = useContinueWatching();
+const RecentlyWatched = () => {
+  const { recentlyWatched, removeFromRecentlyWatched } = useRecentlyWatched();
 
-  if (continueWatching.length === 0) {
+  if (recentlyWatched.length === 0) {
     return null;
   }
 
-  const formatTime = (seconds) => {
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    
-    if (hours > 0) {
-      return `${hours}h ${minutes}m`;
-    }
-    return `${minutes}m`;
-  };
-
-  const getResumeUrl = (item) => {
+  const getDetailUrl = (item) => {
     const baseUrl = `/${item.media_type}/${item.id}`;
-    const params = new URLSearchParams();
-    
-    if (item.currentTime) {
-      params.set('t', Math.floor(item.currentTime));
-    }
-    
-    if (item.season && item.episode) {
-      params.set('season', item.season);
-      params.set('episode', item.episode);
-    }
-    
-    return `${baseUrl}${params.toString() ? `?${params.toString()}` : ''}`;
+    return baseUrl;
   };
 
   return (
     <section className="bg-white/5 backdrop-blur-xl rounded-3xl p-8 border border-white/10 shadow-2xl">
       <div className="flex items-center justify-between mb-8">
         <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-          Continue Watching
+          Recently Watched
         </h2>
         <div className="text-purple-400 text-sm font-medium bg-purple-400/10 px-3 py-1 rounded-full border border-purple-400/20">
-          📺 Resume
+          🕒 Recent
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {continueWatching.map((item) => (
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
+        {recentlyWatched.map((item) => (
           <div
             key={`${item.id}-${item.season || 0}-${item.episode || 0}`}
             className="group relative bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 overflow-hidden shadow-xl hover:shadow-2xl transition-all hover:scale-105"
           >
-            <Link to={getResumeUrl(item)} className="block">
+            <Link to={getDetailUrl(item)} className="block">
               {/* Thumbnail */}
               <div className="relative">
                 <img
                   src={
-                    item.backdrop_path || item.poster_path
-                      ? `https://image.tmdb.org/t/p/w500${item.backdrop_path || item.poster_path}`
+                    item.poster_path
+                      ? `https://image.tmdb.org/t/p/w342${item.poster_path}`
                       : '/placeholder.png'
                   }
                   alt={item.title}
-                  className="w-full h-32 object-cover"
+                  className="w-full h-64 object-cover"
                 />
                 
                 {/* Play overlay */}
@@ -75,12 +54,9 @@ const ContinueWatching = () => {
                   </div>
                 </div>
 
-                {/* Progress bar */}
-                <div className="absolute bottom-0 left-0 right-0 h-1 bg-black/50">
-                  <div
-                    className="h-full bg-red-500 transition-all"
-                    style={{ width: `${item.progress}%` }}
-                  />
+                {/* Media type badge */}
+                <div className="absolute top-2 left-2 bg-black/70 backdrop-blur-sm rounded-full px-2 py-1 text-xs font-medium">
+                  {item.media_type === 'tv' ? '📺 TV' : '🎬 Movie'}
                 </div>
               </div>
 
@@ -96,15 +72,13 @@ const ContinueWatching = () => {
                 </h3>
                 
                 <div className="space-y-1 text-xs text-gray-300">
-                  <div className="flex justify-between items-center">
-                    <span>{Math.round(item.progress)}% complete</span>
-                    <span className="text-purple-400">
-                      {item.duration ? formatTime(item.currentTime) : ''}
-                    </span>
+                  <div className="flex items-center gap-1">
+                    <span className="text-yellow-400">⭐</span>
+                    <span>{item.vote_average.toFixed(1)}</span>
                   </div>
                   
                   <p className="text-gray-400">
-                    {formatDistanceToNow(new Date(item.lastWatched), { addSuffix: true })}
+                    Watched {formatDistanceToNow(new Date(item.lastWatched), { addSuffix: true })}
                   </p>
                 </div>
               </div>
@@ -115,7 +89,7 @@ const ContinueWatching = () => {
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                removeFromWatching(item.id, item.season, item.episode);
+                removeFromRecentlyWatched(item.id, item.season, item.episode);
               }}
               className="absolute top-2 right-2 bg-black/50 hover:bg-black/70 text-white rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-all"
             >
@@ -130,4 +104,4 @@ const ContinueWatching = () => {
   );
 };
 
-export default ContinueWatching;
+export default RecentlyWatched;

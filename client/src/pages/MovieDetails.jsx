@@ -1,8 +1,12 @@
 import { useParams, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import MovieDetailsSkeleton from '@/components/animations/MovieDetailsSkeleton';
 import SimilarMovies from '@/components/SimilarMovies';
+import { useRecentlyWatched } from '@/context/RecentlyWatchedContext';
+import Loader from '@/components/animations/Loader';
 // -------------------- API CONFIG --------------------
 const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
 const API_URL_BASE = 'https://api.themoviedb.org/3';
@@ -17,7 +21,8 @@ const API_OPTIONS = {
 function MovieDetails() {
   const { id } = useParams();
   const location = useLocation();
-
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   /* -------------------- STATE -------------------- */
   const [item, setItem] = useState(null);
   const [error, setError] = useState('');
@@ -28,10 +33,52 @@ function MovieDetails() {
   const [selectedEpisode, setSelectedEpisode] = useState(1);
   const [seasonData, setSeasonData] = useState(null);
   const [loadingSeason, setLoadingSeason] = useState(false);
-
+  const [showLoader, setShowLoader] = useState(true);
+  const { addToRecentlyWatched } = useRecentlyWatched();
   /* -------------------- DERIVED -------------------- */
   const isTV = location.pathname.startsWith('/tv');
   const type = isTV ? 'tv' : 'movie';
+
+useEffect(() => {
+  const timer = setTimeout(() => {
+    setShowLoader(false);
+  }, 2000);
+
+  return () => clearTimeout(timer); // Cleanup
+}, []);
+
+const handleBack = () => {
+    const fromSearch = searchParams.get('from');
+    const query = searchParams.get('query');
+    
+    if (fromSearch === 'search' && query) {
+      navigate(`/?search=${encodeURIComponent(query)}`);
+    } else {
+      navigate(-1);
+    }
+  };
+
+  // Add to recently watched when user clicks Watch Now
+  const handleWatchNow = () => {
+    setShowPlayer(!showPlayer);
+    
+    if (!showPlayer && item) { // Only add when opening player
+      const watchedItem = {
+        id: item.id,
+        title: item.title || item.name,
+        poster_path: item.poster_path,
+        backdrop_path: item.backdrop_path,
+        media_type: type,
+        season: isTV ? selectedSeason : null,
+        episode: isTV ? selectedEpisode : null,
+        overview: item.overview,
+        vote_average: item.vote_average,
+        release_date: item.release_date || item.first_air_date
+      };
+      
+      addToRecentlyWatched(watchedItem);
+    }
+  };
 
   /* -------------------- FETCH ITEM DETAILS -------------------- */
   useEffect(() => {
@@ -81,17 +128,37 @@ function MovieDetails() {
     };
     fetchSeasonData();
   }, [id, isTV, item, selectedSeason]);
+    const handleVideoProgress = (currentTime, duration) => {
+    if (duration > 0) {
+      const progress = (currentTime / duration) * 100;
+      
+      const watchingItem = {
+        id: item.id,
+        title: item.title || item.name,
+        poster_path: item.poster_path,
+        backdrop_path: item.backdrop_path,
+        media_type: type,
+        season: isTV ? selectedSeason : null,
+        episode: isTV ? selectedEpisode : null
+      };
+      
+      // Add to continue watching when progress is between 5% and 95%
+      if (progress >= 5 && progress <= 95) {
+        addToWatching(watchingItem, progress, currentTime, duration);
+      }
+    }
+  };
 
   /* -------------------- STREAMING SERVERS -------------------- */
   const streamingServers = {
     server1: {
-      name: '2Embed',
+      name: 'VidLink',
       url: (tmdbId, mediaType, season, episode) =>
         mediaType === 'tv'
-          ? `https://www.2embed.cc/embedtv/${tmdbId}/${season}/${episode}`
-          : `https://www.2embed.cc/embed/${mediaType}/${tmdbId}`,
+          ? `https://vidlink.pro/tv/${tmdbId}/${season}/${episode}`
+          : `https://vidlink.pro/movie/${tmdbId}`,
       quality: 'HD',
-      ads: 'Minimal',
+      ads: 'Few',
     },
     server2: {
       name: 'VidSrc',
@@ -103,13 +170,13 @@ function MovieDetails() {
       ads: 'Few',
     },
     server3: {
-      name: 'VidLink',
+      name: '2Embed',
       url: (tmdbId, mediaType, season, episode) =>
         mediaType === 'tv'
-          ? `https://vidlink.pro/tv/${tmdbId}/${season}/${episode}`
-          : `https://vidlink.pro/movie/${tmdbId}`,
+          ? `https://www.2embed.cc/embedtv/${tmdbId}/${season}/${episode}`
+          : `https://www.2embed.cc/embed/${mediaType}/${tmdbId}`,
       quality: 'HD',
-      ads: 'Few',
+      ads: 'Minimal',
     },
   };
 
@@ -145,11 +212,30 @@ function MovieDetails() {
       (v) => v.type === 'Trailer' && v.site === 'YouTube'
     ) || item.videos?.results?.find((v) => v.site === 'YouTube');
 
+// loader?
+  if (showLoader) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-black">
+        <Loader />
+      </div>
+    );
+  }
+
   /* -------------------- RENDER -------------------- */
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 text-white">
       <Navbar />
-      
+       <div className="pt-20 px-4 md:px-8 lg:px-16">
+        <button
+          onClick={handleBack}
+          className="mb-4 flex items-center gap-2 text-gray-300 hover:text-white transition-colors"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+          Back to {searchParams.get('from') === 'search' ? 'Search Results' : 'Home'}
+        </button>
+      </div>
       {/* Hero Section */}
       <div className="relative">
         {backdrop && (
@@ -216,7 +302,7 @@ function MovieDetails() {
                 {/* Action Buttons */}
                 <div className="flex flex-wrap gap-4 pt-4">
                   <button
-                    onClick={() => setShowPlayer(!showPlayer)}
+                    onClick={handleWatchNow} 
                     className="flex items-center gap-3 bg-red-600 hover:bg-red-700 px-8 py-4 rounded-xl font-semibold text-lg transition-all transform hover:scale-105 shadow-lg"
                   >
                     <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">

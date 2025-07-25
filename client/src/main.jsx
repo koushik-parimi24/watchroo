@@ -6,12 +6,13 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'
 import {  LoadingProvider } from './context/LoadingContext';
-import { ContinueWatchingProvider } from './context/ContinueWatchingContext';
+import { RecentlyWatchedProvider } from './context/RecentlyWatchedContext';
+
 
 createRoot(document.getElementById('root')).render(
   <WatchlistProvider> 
     <LoadingProvider>
-      <ContinueWatchingProvider>     
+      <RecentlyWatchedProvider>    
     <BrowserRouter>
       <Routes>
         <Route path="/"           element={<App />} />
@@ -20,7 +21,7 @@ createRoot(document.getElementById('root')).render(
         <Route path="/watchlist"  element={<WatchList />} />
       </Routes>
     </BrowserRouter>
-    </ContinueWatchingProvider>
+    </RecentlyWatchedProvider>
     </LoadingProvider>  
   </WatchlistProvider> 
 )

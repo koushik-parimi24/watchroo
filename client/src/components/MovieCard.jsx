@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Bookmark, BookmarkCheck } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useLoading } from '@/context/LoadingContext';
+import './moviecard.css'; // Add this if your styles are in loader.css
 
 const MovieCard = ({ movie, isLoading = false }) => {
   const { watchlist, add, remove } = useContext(WatchlistContext);
@@ -25,15 +26,9 @@ const MovieCard = ({ movie, isLoading = false }) => {
     }
   }, [watchlist, id, movie]);
 
-  // Show skeleton while loading or if no movie data
-  if (isLoading || !movie) {
-    return <MovieCardSkeleton />;
-  }
+  if (isLoading || !movie) return <MovieCardSkeleton />;
 
-  const handleImageLoad = () => {
-    setImageLoaded(true);
-  };
-
+  const handleImageLoad = () => setImageLoaded(true);
   const handleImageError = () => {
     setImageError(true);
     setImageLoaded(true);
@@ -44,19 +39,19 @@ const MovieCard = ({ movie, isLoading = false }) => {
       initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: 'easeOut' }}
-      whileHover={{ scale: 1.03 }}
-      className="relative"
+      className="card-3d relative"
     >
       <Link to={`/${mediaType}/${id}`} onClick={() => setIsLoading(true)} className="block">
-        <div className="bg-white/10 backdrop-blur-md border border-white/20 p-4 rounded-2xl shadow-lg hover:shadow-2xl transition">
-          {/* Image with loading state */}
+        <div className="card-inner bg-white/10 backdrop-blur-md border border-white/20 p-4 rounded-2xl shadow-lg hover:shadow-2xl transition">
+
+          {/* Image section */}
           <div className="relative w-full h-full rounded overflow-hidden bg-gray-700">
             {!imageLoaded && !imageError && (
               <div className="absolute inset-0 bg-gray-600/50 animate-pulse flex items-center justify-center">
                 <div className="w-8 h-8 border-2 border-white/20 border-t-white/60 rounded-full animate-spin"></div>
               </div>
             )}
-            
+
             <img
               src={movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : '/placeholder.png'}
               alt={title}
@@ -66,7 +61,7 @@ const MovieCard = ({ movie, isLoading = false }) => {
               onLoad={handleImageLoad}
               onError={handleImageError}
             />
-            
+
             {imageError && (
               <div className="absolute inset-0 bg-gray-700 flex items-center justify-center">
                 <div className="text-gray-400 text-center p-4">
@@ -78,14 +73,15 @@ const MovieCard = ({ movie, isLoading = false }) => {
               </div>
             )}
           </div>
-          
-          <h3 className="text-white mt-3 font-bold text-lg line-clamp-1 overflow-hidden">{title}</h3>
+
+          <h3 className="card-title-3d text-white mt-3 font-bold text-lg line-clamp-1 overflow-hidden">{title}</h3>
           <p className="text-gray-400 text-sm">Release: {date}</p>
           <p className="text-blue-400 text-xs italic">{mediaType === 'tv' ? 'TV Show' : 'Movie'}</p>
           <p className="text-yellow-400 text-sm">⭐ {rating}</p>
         </div>
       </Link>
 
+      {/* Bookmark button */}
       <button
         onClick={(e) => {
           e.preventDefault();
@@ -100,35 +96,18 @@ const MovieCard = ({ movie, isLoading = false }) => {
   );
 };
 
-// Skeleton component within the same file for convenience
-const MovieCardSkeleton = () => {
-  return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="relative"
-    >
-      <div className="bg-white/10 backdrop-blur-md border border-white/20 p-4 rounded-2xl shadow-lg">
-        {/* Poster skeleton with shimmer effect */}
-        <div className="w-full h-72 bg-gradient-to-r from-gray-600/50 via-gray-500/50 to-gray-600/50 bg-[length:200%_100%] animate-shimmer rounded mb-3"></div>
-        
-        {/* Title skeleton */}
-        <div className="h-6 bg-gradient-to-r from-gray-600/50 via-gray-500/50 to-gray-600/50 bg-[length:200%_100%] animate-shimmer rounded mb-2 w-3/4"></div>
-        
-        {/* Release date skeleton */}
-        <div className="h-4 bg-gradient-to-r from-gray-600/50 via-gray-500/50 to-gray-600/50 bg-[length:200%_100%] animate-shimmer rounded mb-1 w-1/2"></div>
-        
-        {/* Media type skeleton */}
-        <div className="h-3 bg-gradient-to-r from-gray-600/50 via-gray-500/50 to-gray-600/50 bg-[length:200%_100%] animate-shimmer rounded mb-1 w-1/3"></div>
-        
-        {/* Rating skeleton */}
-        <div className="h-4 bg-gradient-to-r from-gray-600/50 via-gray-500/50 to-gray-600/50 bg-[length:200%_100%] animate-shimmer rounded w-1/4"></div>
-      </div>
-      
-      {/* Bookmark button skeleton */}
-      <div className="absolute top-3 right-3 w-10 h-10 bg-gradient-to-r from-gray-600/50 via-gray-500/50 to-gray-600/50 bg-[length:200%_100%] animate-shimmer rounded-full"></div>
-    </motion.div>
-  );
-};
+// Skeleton component remains unchanged
+const MovieCardSkeleton = () => (
+  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="relative">
+    <div className="bg-white/10 backdrop-blur-md border border-white/20 p-4 rounded-2xl shadow-lg">
+      <div className="w-full h-72 bg-gradient-to-r from-gray-600/50 via-gray-500/50 to-gray-600/50 bg-[length:200%_100%] animate-shimmer rounded mb-3"></div>
+      <div className="h-6 bg-gradient-to-r from-gray-600/50 via-gray-500/50 to-gray-600/50 animate-shimmer rounded mb-2 w-3/4"></div>
+      <div className="h-4 bg-gradient-to-r from-gray-600/50 via-gray-500/50 to-gray-600/50 animate-shimmer rounded mb-1 w-1/2"></div>
+      <div className="h-3 bg-gradient-to-r from-gray-600/50 via-gray-500/50 to-gray-600/50 animate-shimmer rounded mb-1 w-1/3"></div>
+      <div className="h-4 bg-gradient-to-r from-gray-600/50 via-gray-500/50 to-gray-600/50 animate-shimmer rounded w-1/4"></div>
+    </div>
+    <div className="absolute top-3 right-3 w-10 h-10 bg-gradient-to-r from-gray-600/50 via-gray-500/50 to-gray-600/50 animate-shimmer rounded-full"></div>
+  </motion.div>
+);
 
 export default MovieCard;

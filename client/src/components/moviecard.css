@@ -1,0 +1,23 @@
+.card-3d {
+  perspective: 500px;
+}
+
+.card-inner {
+  transform-style: preserve-3d;
+  will-change: transform;
+  transition: transform 0.5s;
+}
+
+.card-inner:hover {
+  transform:   rotateX(10deg) rotateY(-30deg);
+}
+
+.card-title-3d:hover {
+  transform: translateY(-5px);
+}
+.card-title-3d {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #fff;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}

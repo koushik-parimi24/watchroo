@@ -6,7 +6,7 @@ import MovieCard from './components/MovieCard'
 import Navbar from './components/Navbar';
 import FilterPanel from './components/FilterPanel';
 import SkeletonGrid from './components/SkeletonGrid';
-import ContinueWatching from './components/ContinueWatching'
+import RecentlyWatched from './components/RecentlyWatched'
 
 
 const API_KEY = import.meta.env.VITE_TMDB_API_KEY
@@ -317,7 +317,7 @@ function App() {
             <div className="flex gap-4">
               <button
                 onClick={() => setShowFilters(!showFilters)}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
+                className=" text-white px-4 py-2 rounded-lg transition-colors"
               >
                 {showFilters ? 'Hide Filters' : 'Show Filters'}
               </button>
@@ -363,8 +363,19 @@ function App() {
           ) : (
             <>
              <div className="space-y-16">
-             <ContinueWatching />
+             <RecentlyWatched />
               {/* Top Movies Section */}
+              <h2 className='text-white text-2xl mb-4 py-6'>Popular Movies</h2>
+              
+              {initialLoading ? (
+                <SkeletonGrid count={12} className="py-8" />
+              ) : (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6 py-8">
+                  {movies.map((movie) => (
+                    <MovieCard key={movie.id} movie={movie} />
+                  ))}
+                </div>
+              )}
               <h2 className='text-white text-2xl mb-4'>Top Movies</h2>
               {initialLoading ? (
                 <SkeletonGrid count={8} className="py-4" />
@@ -377,7 +388,7 @@ function App() {
               )}
 
               {/* Top TV Shows Section */}
-              <h2 className='text-white text-2xl mb-4'>Top TV Shows</h2>
+              <h2 className='text-whwite text-2xl mb-4'>Top TV Shows</h2>
               
               {initialLoading ? (
                 <SkeletonGrid count={8} className="py-4" />
@@ -390,17 +401,6 @@ function App() {
               )}
 
               {/* Popular Movies Section */}
-              <h2 className='text-white text-2xl mb-4 py-6'>Popular Movies</h2>
-              
-              {initialLoading ? (
-                <SkeletonGrid count={12} className="py-8" />
-              ) : (
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6 py-8">
-                  {movies.map((movie) => (
-                    <MovieCard key={movie.id} movie={movie} />
-                  ))}
-                </div>
-              )}
 
               {/* Popular TV Shows Section */}
               <h2 className='text-white text-2xl mb-4 py-6'>Popular TV Shows</h2>
