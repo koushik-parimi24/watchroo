@@ -6,7 +6,7 @@ import MovieCard from './components/MovieCard'
 import Navbar from './components/Navbar';
 import FilterPanel from './components/FilterPanel';
 import SkeletonGrid from './components/SkeletonGrid';
-
+import ContinueWatching from './components/ContinueWatching'
 
 
 const API_KEY = import.meta.env.VITE_TMDB_API_KEY
@@ -362,6 +362,8 @@ function App() {
             </>
           ) : (
             <>
+             <div className="space-y-16">
+             <ContinueWatching />
               {/* Top Movies Section */}
               <h2 className='text-white text-2xl mb-4'>Top Movies</h2>
               {initialLoading ? (
@@ -408,10 +410,13 @@ function App() {
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6 py-8">
                   {tvShows.map((tv) => (
                     <MovieCard key={tv.id} movie={tv} />
+                    
                   ))}
                 </div>
               )}
+              </div>
             </>
+            
           )}
         </section>
       </div>
