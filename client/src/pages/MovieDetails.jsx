@@ -1,6 +1,7 @@
 import { useParams, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import Navbar from '@/components/Navbar';
+import MovieDetailsSkeleton from '@/components/animations/MovieDetailsSkeleton';
 
 // -------------------- API CONFIG --------------------
 const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
@@ -137,7 +138,7 @@ function MovieDetails() {
 
   /* -------------------- EARLY RETURNS -------------------- */
   if (error) return <div className="text-destructive p-4">{error}</div>;
-  if (!item) return <div className="text-foreground p-4">Loading...</div>;
+ if (!item) return <MovieDetailsSkeleton />;
 
   /* -------------------- BASIC DERIVED DATA -------------------- */
   const title = item.title || item.name;
