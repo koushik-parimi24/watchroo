@@ -317,7 +317,7 @@ function App() {
             <div className="flex gap-4">
               <button
                 onClick={() => setShowFilters(!showFilters)}
-                className=" text-white px-4 py-2 rounded-lg transition-colors"
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
               >
                 {showFilters ? 'Hide Filters' : 'Show Filters'}
               </button>
@@ -388,7 +388,7 @@ function App() {
               )}
 
               {/* Top TV Shows Section */}
-              <h2 className='text-whwite text-2xl mb-4'>Top TV Shows</h2>
+              <h2 className='text-white text-2xl mb-4'>Top TV Shows</h2>
               
               {initialLoading ? (
                 <SkeletonGrid count={8} className="py-4" />
