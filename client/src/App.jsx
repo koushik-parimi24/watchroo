@@ -1,5 +1,5 @@
 import './App.css'
-import Search from './components/Search'
+import { Analytics } from '@vercel/analytics/react';
 import {useEffect, useState,useRef } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import MovieCard from './components/MovieCard'
@@ -297,9 +297,19 @@ function App() {
   return (
     <>
 <main>
-  <Navbar />
-<Hero/>
-
+   <Analytics />
+  <Navbar
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
+        onSearch={handleSearch}
+  />
+<Hero
+  showFilters={showFilters}
+  setShowFilters={setShowFilters}
+  isFiltering={isFiltering}
+  isSearching={isSearching}
+  clearFilters={clearFilters}
+/>
   {/* Filters below hero */}
   {showFilters && (
     <div className="px-4">

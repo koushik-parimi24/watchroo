@@ -1,10 +1,6 @@
 import { useRef, useState } from 'react';
-import Search from './Search';
 
 export default function Hero({
-  searchTerm,
-  setSearchTerm,
-  handleSearch,
   showFilters,
   setShowFilters,
   isFiltering,
@@ -23,17 +19,17 @@ export default function Hero({
 
   return (
     <section className="relative w-full h-[90vh] overflow-hidden flex items-center justify-center text-center px-4">
-      <video
-        ref={videoRef}
-        className="absolute inset-0 w-full h-full object-cover"
-        autoPlay
-        loop
-        muted={isMuted}
-        playsInline
-      >
-        <source src="/hero.mp4" type="video/mp4" />
-        Your browser does not support the video tag.
-      </video>
+   <video
+  src="/hero.mp4"
+  className="absolute inset-0 w-full h-full object-cover"
+  autoPlay
+  loop
+  playsInline
+  ref={videoRef}
+  muted={isMuted} // this alone is correct
+>
+    </video>
+
 
       <div className="absolute inset-0 bg-black/50 z-10" />
       <div className="absolute bottom-0 w-full h-32 bg-gradient-to-b from-transparent to-black z-10" />
@@ -51,11 +47,7 @@ export default function Hero({
         </h1>
 
         <div className="flex flex-col items-center gap-4 mt-6">
-          <Search
-            searchTerm={searchTerm}
-            setSearchTerm={setSearchTerm}
-            onSearch={handleSearch}
-          />
+    
 
           <div className="flex gap-4">
             <button

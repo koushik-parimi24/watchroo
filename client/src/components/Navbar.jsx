@@ -1,28 +1,19 @@
-import React, { useState, useEffect, useContext } from 'react';
+import { Link } from 'react-router-dom';
 import { supabase } from '@/lib/supabaseClient.js';
-import { Link, useNavigate } from 'react-router-dom';
-import { WatchlistContext } from '@/context/WatchlistContext';
+import { useSession } from '@supabase/auth-helpers-react';
+import { useEffect, useState } from 'react';
+import Search from './Search';
 
-const Navbar = () => {
-  const { watchlist } = useContext(WatchlistContext);
-  const [session, setSession] = useState([]);
-  const [menuOpen, setMenuOpen] = useState(false);
+const Navbar = ({ searchTerm, setSearchTerm, onSearch }) => {
+  const session = useSession();
+  const [watchlist, setWatchlist] = useState([]);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-    });
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, []);
+    if (session?.user) {
+      const stored = localStorage.getItem(`watchlist-${session.user.id}`);
+      if (stored) setWatchlist(JSON.parse(stored));
+    }
+  }, [session]);
 
   const handleLogin = async () => {
     await supabase.auth.signInWithOAuth({ provider: 'google' });
@@ -30,29 +21,35 @@ const Navbar = () => {
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
+    window.location.reload();
   };
 
   return (
-    <nav className="fixed top-0 left-0 w-full bg-black/30 backdrop-blur-md z-50 px-4 py-3">
-      <div className="flex flex-wrap justify-between items-center">
-        {/* Logo and Title */}
-        <Link to="/" className="flex items-center gap-2 mb-2 sm:mb-0">
-          <img src="/headerlogo.png" alt="Logo" className="w-[40px] h-[40px]" />
-          <h1 className="text-xl font-bold text-white">Watchroo</h1>
-        </Link>
+    <nav className="bg-black bg-opacity-70 backdrop-blur-md px-4 py-3 fixed top-0 w-full z-50 border-b border-white/10">
+      <div className="w-full flex flex-col sm:flex-row items-center justify-between gap-4">
+        
+        {/* Logo */}
+        <div className="flex items-center gap-2">
+          <Link to="/" className="flex items-center gap-2">
+            <img src="/headerlogo.png" alt="Logo" className="w-[40px] h-[40px]" />
+            <h1 className="text-xl font-bold text-white">Watchroo</h1>
+          </Link>
+        </div>
 
-        {/* Right Side: Login/Logout + Watchlist */}
+        {/* Search Centered */}
+        <div className="w-full sm:w-auto flex justify-center sm:justify-center">
+          <Search
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            onSearch={onSearch}
+          />
+        </div>
+
+        {/* Right Section */}
         <div className="flex items-center gap-4 text-white">
-          {/* Watchlist Icon */}
           <div className="relative">
             <Link to="/watchlist">
-              <svg
-                width="26"
-                height="26"
-                className="text-amber-500 hover:scale-110 transition"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-              >
+              <svg width="26" height="26" className="text-amber-500 hover:scale-110 transition" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M5 3c-1.1 0-2 .9-2 2v16l9-4 9 4V5c0-1.1-.9-2-2-2H5z" />
               </svg>
               {watchlist.length > 0 && (
@@ -63,7 +60,6 @@ const Navbar = () => {
             </Link>
           </div>
 
-          {/* User Section */}
           {session?.user ? (
             <>
               <span className="text-sm hidden sm:inline">Hi, {session.user.email.split('@')[0]}</span>
