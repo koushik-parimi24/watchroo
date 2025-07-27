@@ -1,19 +1,14 @@
 import { Link } from 'react-router-dom';
-import { supabase } from '@/lib/supabaseClient.js';
+import { supabase } from '@/lib/supabaseClient';
 import { useSession } from '@supabase/auth-helpers-react';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import Search from './Search';
+import { useContext } from 'react';
+import { WatchlistContext } from '@/context/WatchlistContext';
 
 const Navbar = ({ searchTerm, setSearchTerm, onSearch }) => {
   const session = useSession();
-  const [watchlist, setWatchlist] = useState([]);
-
-  useEffect(() => {
-    if (session?.user) {
-      const stored = localStorage.getItem(`watchlist-${session.user.id}`);
-      if (stored) setWatchlist(JSON.parse(stored));
-    }
-  }, [session]);
+  const { watchlist } = useContext(WatchlistContext); // ✅ Access watchlist from context
 
   const handleLogin = async () => {
     await supabase.auth.signInWithOAuth({ provider: 'google' });
@@ -21,21 +16,21 @@ const Navbar = ({ searchTerm, setSearchTerm, onSearch }) => {
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
+    localStorage.removeItem('user');
     window.location.reload();
   };
+
+  useEffect(() => {
+    if (session?.user) {
+      localStorage.setItem('user', JSON.stringify(session.user));
+    }
+  }, [session]);
 
   return (
     <nav className="bg-black bg-opacity-70 backdrop-blur-md px-4 py-3 fixed top-0 w-full z-50 border-b border-white/10">
       <div className="w-full flex flex-col sm:flex-row items-center justify-between gap-4">
-        
-        {/* Logo - hidden on small screens */}
-        <div className="hidden sm:flex items-center gap-2">
-          <Link to="/" className="flex items-center gap-2">
-            <img src="/headerlogo.png" alt="Logo" className="w-[40px] h-[40px]" />
-            <h1 className="text-xl font-bold text-white">Watchroo</h1>
-          </Link>
-        </div>
-
+        <img src="/headerlogo.png" alt="" className='w-16 h-16 hidden lg:block'/>
+        <h1 className='text-white hidden lg:block text-4xl'>watchroo</h1>
         {/* Search Bar */}
         <div className="w-full flex justify-center">
           <Search
@@ -64,7 +59,7 @@ const Navbar = ({ searchTerm, setSearchTerm, onSearch }) => {
           {/* Auth Buttons */}
           {session?.user ? (
             <>
-              <span className="text-sm hidden sm:inline">Hi, {session.user.email.split('@')[0]}</span>
+              <span className="text-sm hidden sm:inline">Hi,{session.user.email.split('@')[0]}</span>
               <button
                 onClick={handleLogout}
                 className="bg-red-500 px-3 py-1 text-sm rounded hover:bg-red-400 transition"
