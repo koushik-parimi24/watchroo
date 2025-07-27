@@ -55,7 +55,7 @@ const RecentlyWatched = () => {
                 </div>
 
                 {/* Media type badge */}
-                <div className="absolute top-2 left-2 bg-black/70 backdrop-blur-sm rounded-full px-2 py-1 text-xs font-medium">
+                <div className="absolute text-white top-2 left-2 bg-black/70 backdrop-blur-sm rounded-full px-2 py-1 text-xs font-medium">
                   {item.media_type === 'tv' ? '📺 TV' : '🎬 Movie'}
                 </div>
               </div>
@@ -91,7 +91,7 @@ const RecentlyWatched = () => {
                 e.stopPropagation();
                 removeFromRecentlyWatched(item.id, item.season, item.episode);
               }}
-              className="absolute top-2 right-2 bg-black/50 hover:bg-black/70 text-white rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-all"
+              className="absolute top-2 right-2 bg-black/50 hover:bg-black/70 text-white rounded-full p-1.5  transition-all"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

@@ -1,12 +1,13 @@
 import './App.css'
 import Search from './components/Search'
-import {useEffect, useState } from 'react'
+import {useEffect, useState,useRef } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import MovieCard from './components/MovieCard'
 import Navbar from './components/Navbar';
 import FilterPanel from './components/FilterPanel';
 import SkeletonGrid from './components/SkeletonGrid';
 import RecentlyWatched from './components/RecentlyWatched'
+import Hero from './components/Hero'
 
 
 const API_KEY = import.meta.env.VITE_TMDB_API_KEY
@@ -294,133 +295,100 @@ function App() {
   }, []);
 
   return (
-    <main className="py-24 flex items-center justify-center">
-      <Navbar/>
-      <div
-        className="absolute inset-0 bg-cover bg-center z-0"
-        style={{ backgroundImage: `url('./hero-bg.png')` }}
+    <>
+<main>
+  <Navbar />
+<Hero/>
+
+  {/* Filters below hero */}
+  {showFilters && (
+    <div className="px-4">
+      <FilterPanel
+        filters={filters}
+        genres={genres}
+        onFilterChange={handleFilter}
       />
-      <div className="wrapper relative z-10 text-center px-4">
-        <header className="mb-6">
-          <img src="./hero.png" alt="Hero Banner" className="mx-auto max-h-96" />
-          <h1 className="text-4xl md:text-5xl font-bold text-white">
-            Find <span className="text-gradient">Movies</span> you'll enjoy
-          </h1>
-          
-          <div className="flex flex-col items-center gap-4 mt-6">
-            <Search
-              searchTerm={searchTerm}
-              setSearchTerm={setSearchTerm}
-              onSearch={handleSearch}
-            />
-            
-            <div className="flex gap-4">
-              <button
-                onClick={() => setShowFilters(!showFilters)}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
-              >
-                {showFilters ? 'Hide Filters' : 'Show Filters'}
-              </button>
-              
-              {(isFiltering || isSearching) && (
-                <button
-                  onClick={clearFilters}
-                  className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition-colors"
-                >
-                  Clear All
-                </button>
-              )}
-            </div>
+    </div>
+  )}
+
+  {/* Main Content */}
+  <section className="wrapper px-4">
+    {errorMessage && <p className="text-red-400 py-2">{errorMessage}</p>}
+
+    {(isSearching || isFiltering) ? (
+      <>
+        <h2 className="text-white text-2xl mb-4 py-6">
+          {isSearching ? 'Search Results' : 'Filtered Results'}
+        </h2>
+        {(searchLoading || filterLoading) ? (
+          <SkeletonGrid count={12} className="py-8" />
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6 py-8">
+            {movies.map((item) => (
+              <MovieCard key={`${item.id}-${item.media_type}`} movie={item} />
+            ))}
           </div>
-        </header>
-
-        {showFilters && (
-          <FilterPanel
-            filters={filters}
-            genres={genres}
-            onFilterChange={handleFilter}
-          />
         )}
+      </>
+    ) : (
+      <>
+        <div className="space-y-16 text-center">
+          <RecentlyWatched />
 
-        <section className="all-movies">
-          {errorMessage && <p className='text-red-400 py-2'>{errorMessage}</p>}
-
-          {(isSearching || isFiltering) ? (
-            <>
-              <h2 className='text-white text-2xl mb-4 py-6'>
-                {isSearching ? 'Search Results' : 'Filtered Results'}
-              </h2>
-              {(searchLoading || filterLoading) ? (
-                <SkeletonGrid count={12} className="py-8" />
-              ) : (
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6 py-8">
-                  {movies.map((item) => (
-                    <MovieCard key={`${item.id}-${item.media_type}`} movie={item} />
-                  ))}
-                </div>
-              )}
-            </>
+          {/* Popular Movies */}
+          <h2 className="text-white text-2xl mb-4">Popular Movies</h2>
+          {initialLoading ? (
+            <SkeletonGrid count={12} className="py-8" />
           ) : (
-            <>
-             <div className="space-y-16">
-             <RecentlyWatched />
-              {/* Top Movies Section */}
-              <h2 className='text-white text-2xl mb-4 py-6'>Popular Movies</h2>
-              
-              {initialLoading ? (
-                <SkeletonGrid count={12} className="py-8" />
-              ) : (
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6 py-8">
-                  {movies.map((movie) => (
-                    <MovieCard key={movie.id} movie={movie} />
-                  ))}
-                </div>
-              )}
-              <h2 className='text-white text-2xl mb-4'>Top Movies</h2>
-              {initialLoading ? (
-                <SkeletonGrid count={8} className="py-4" />
-              ) : (
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6 py-4">
-                  {topMovies.map((movie) => (
-                    <MovieCard key={movie.id} movie={movie} />
-                  ))}
-                </div>
-              )}
-
-              {/* Top TV Shows Section */}
-              <h2 className='text-white text-2xl mb-4'>Top TV Shows</h2>
-              
-              {initialLoading ? (
-                <SkeletonGrid count={8} className="py-4" />
-              ) : (
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6 py-4">
-                  {topTvShow.map((tv) => (
-                    <MovieCard key={tv.id} movie={tv} />
-                  ))}
-                </div>
-              )}
-
-              {/* Popular Movies Section */}
-
-              {/* Popular TV Shows Section */}
-              <h2 className='text-white text-2xl mb-4 py-6'>Popular TV Shows</h2>
-              {initialLoading ? (
-                <SkeletonGrid count={12} className="py-8" />
-              ) : (
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6 py-8">
-                  {tvShows.map((tv) => (
-                    <MovieCard key={tv.id} movie={tv} />
-                    
-                  ))}
-                </div>
-              )}
-              </div>
-            </>
-            
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6 py-8">
+              {movies.map((movie) => (
+                <MovieCard key={movie.id} movie={movie} />
+              ))}
+            </div>
           )}
-        </section>
-      </div>
-    </main>
+
+          {/* Top Movies */}
+          <h2 className="text-white text-2xl mb-4">Top Movies</h2>
+          {initialLoading ? (
+            <SkeletonGrid count={8} className="py-4" />
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6 py-4">
+              {topMovies.map((movie) => (
+                <MovieCard key={movie.id} movie={movie} />
+              ))}
+            </div>
+          )}
+
+          {/* Top TV Shows */}
+          <h2 className="text-white text-2xl mb-4">Top TV Shows</h2>
+          {initialLoading ? (
+            <SkeletonGrid count={8} className="py-4" />
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6 py-4">
+              {topTvShow.map((tv) => (
+                <MovieCard key={tv.id} movie={tv} />
+              ))}
+            </div>
+          )}
+
+          {/* Popular TV Shows */}
+          <h2 className="text-white text-2xl mb-4 py-6">Popular TV Shows</h2>
+          {initialLoading ? (
+            <SkeletonGrid count={12} className="py-8" />
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6 py-8">
+              {tvShows.map((tv) => (
+                <MovieCard key={tv.id} movie={tv} />
+              ))}
+            </div>
+          )}
+        </div>
+      </>
+    )}
+  </section>
+</main>
+
+    </>
   )
 }
 

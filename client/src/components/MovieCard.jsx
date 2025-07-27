@@ -55,7 +55,7 @@ const MovieCard = ({ movie, isLoading = false }) => {
             <img
               src={movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : '/placeholder.png'}
               alt={title}
-              className={`w-full h-full object-cover transition-opacity duration-300 ${
+              className={`w-full h-84 object-cover transition-opacity duration-300 ${
                 imageLoaded ? 'opacity-100' : 'opacity-0'
               }`}
               onLoad={handleImageLoad}
