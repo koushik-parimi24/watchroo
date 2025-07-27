@@ -28,16 +28,16 @@ const Navbar = ({ searchTerm, setSearchTerm, onSearch }) => {
     <nav className="bg-black bg-opacity-70 backdrop-blur-md px-4 py-3 fixed top-0 w-full z-50 border-b border-white/10">
       <div className="w-full flex flex-col sm:flex-row items-center justify-between gap-4">
         
-        {/* Logo */}
-        <div className="flex items-center gap-2">
+        {/* Logo - hidden on small screens */}
+        <div className="hidden sm:flex items-center gap-2">
           <Link to="/" className="flex items-center gap-2">
             <img src="/headerlogo.png" alt="Logo" className="w-[40px] h-[40px]" />
             <h1 className="text-xl font-bold text-white">Watchroo</h1>
           </Link>
         </div>
 
-        {/* Search Centered */}
-        <div className="w-full sm:w-auto flex justify-center sm:justify-center">
+        {/* Search Bar */}
+        <div className="w-full flex justify-center">
           <Search
             searchTerm={searchTerm}
             setSearchTerm={setSearchTerm}
@@ -46,7 +46,8 @@ const Navbar = ({ searchTerm, setSearchTerm, onSearch }) => {
         </div>
 
         {/* Right Section */}
-        <div className="flex items-center gap-4 text-white">
+        <div className="flex items-center gap-3 text-white">
+          {/* Watchlist icon */}
           <div className="relative">
             <Link to="/watchlist">
               <svg width="26" height="26" className="text-amber-500 hover:scale-110 transition" viewBox="0 0 24 24" fill="currentColor">
@@ -60,6 +61,7 @@ const Navbar = ({ searchTerm, setSearchTerm, onSearch }) => {
             </Link>
           </div>
 
+          {/* Auth Buttons */}
           {session?.user ? (
             <>
               <span className="text-sm hidden sm:inline">Hi, {session.user.email.split('@')[0]}</span>
