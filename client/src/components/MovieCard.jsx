@@ -21,10 +21,9 @@ const MovieCard = ({ movie, isLoading = false }) => {
   const rating = movie?.vote_average ?? 'N/A';
 
   useEffect(() => {
-    if (movie && watchlist) {
-      setSaved(watchlist.some((w) => w.media_id === id));
-    }
-  }, [watchlist, id, movie]);
+    const isSaved = watchlist.some((w) => String(w.media_id) === String(movie.id));
+    setSaved(isSaved);
+  }, [watchlist, movie.id]);
 
   if (isLoading || !movie) return <MovieCardSkeleton />;
 

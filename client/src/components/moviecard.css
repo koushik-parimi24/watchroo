@@ -1,23 +1,86 @@
 .card-3d {
-  perspective: 500px;
+  perspective: 1000px;
+  cursor: pointer;
 }
 
 .card-inner {
   transform-style: preserve-3d;
   will-change: transform;
-  transition: transform 0.5s;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  position: relative;
+  overflow: hidden;
 }
 
 .card-inner:hover {
-  transform:   rotateX(10deg) rotateY(-30deg);
+  transform: rotateX(8deg) rotateY(-15deg) scale(1.05);
+  box-shadow: 
+    0 20px 40px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.1),
+    0 0 20px rgba(59, 130, 246, 0.3);
 }
 
-.card-title-3d:hover {
-  transform: translateY(-5px);
+.card-inner::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.1),
+    transparent
+  );
+  transition: left 0.6s;
 }
+
+.card-inner:hover::before {
+  left: 100%;
+}
+
 .card-title-3d {
   font-size: 1.5rem;
   font-weight: bold;
   color: #fff;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  transition: all 0.3s ease;
+}
+
+.card-title-3d:hover {
+  transform: translateY(-3px);
+  text-shadow: 
+    0 4px 8px rgba(0, 0, 0, 0.6),
+    0 0 20px rgba(59, 130, 246, 0.4);
+}
+
+/* Enhanced image hover effects */
+.card-inner img {
+  transition: all 0.4s ease;
+}
+
+.card-inner:hover img {
+  transform: scale(1.1);
+  filter: brightness(1.1) contrast(1.05);
+}
+
+/* Bookmark button hover enhancement */
+.card-3d button {
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.card-3d button:hover {
+  transform: scale(1.1) rotate(5deg);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+}
+
+/* Rating hover effect */
+.card-inner p:last-child {
+  transition: all 0.3s ease;
+}
+
+.card-inner:hover p:last-child {
+  transform: scale(1.1);
+  text-shadow: 0 0 10px rgba(255, 193, 7, 0.6);
 }

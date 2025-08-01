@@ -34,20 +34,26 @@ function MovieDetails() {
   const [seasonData, setSeasonData] = useState(null);
   const [loadingSeason, setLoadingSeason] = useState(false);
   const [showLoader, setShowLoader] = useState(true);
+  const [isLoadingDetails, setIsLoadingDetails] = useState(true);
+  const [dataLoaded, setDataLoaded] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
   const { addToRecentlyWatched } = useRecentlyWatched();
   /* -------------------- DERIVED -------------------- */
   const isTV = location.pathname.startsWith('/tv');
   const type = isTV ? 'tv' : 'movie';
 
 useEffect(() => {
-  const timer = setTimeout(() => {
-    setShowLoader(false);
-  }, 2000);
+  // Show loader for at least 1 second, then hide when data is loaded
+  if (dataLoaded && item && !isLoadingDetails) {
+    const timer = setTimeout(() => {
+      setShowLoader(false);
+    }, 1000); // 1 second minimum
 
-  return () => clearTimeout(timer); // Cleanup
-}, []);
+    return () => clearTimeout(timer);
+  }
+}, [item, isLoadingDetails, dataLoaded]);
 
-const handleBack = () => {
+  const handleBack = () => {
     const fromSearch = searchParams.get('from');
     const query = searchParams.get('query');
     
@@ -55,6 +61,13 @@ const handleBack = () => {
       navigate(`/?search=${encodeURIComponent(query)}`);
     } else {
       navigate(-1);
+    }
+  };
+
+  // Handle search from movie details page
+  const handleSearch = () => {
+    if (searchTerm.trim()) {
+      navigate(`/?search=${encodeURIComponent(searchTerm.trim())}`);
     }
   };
 
@@ -83,6 +96,7 @@ const handleBack = () => {
   /* -------------------- FETCH ITEM DETAILS -------------------- */
   useEffect(() => {
     const fetchDetails = async () => {
+      setIsLoadingDetails(true);
       try {
         const res = await fetch(
           `${API_URL_BASE}/${type}/${id}?append_to_response=videos,credits,external_ids`,
@@ -100,6 +114,9 @@ const handleBack = () => {
       } catch (err) {
         console.error(err);
         setError('Failed to load details. Please try again later.');
+      } finally {
+        setIsLoadingDetails(false);
+        setDataLoaded(true);
       }
     };
     fetchDetails();
@@ -215,8 +232,100 @@ const handleBack = () => {
 // loader?
   if (showLoader) {
     return (
-      <div className="flex items-center justify-center h-screen bg-black">
-        <Loader />
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 text-white">
+        <Navbar 
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          onSearch={handleSearch}
+          onLogoClick={() => {
+            setSearchTerm('');
+            navigate('/');
+          }}
+        />
+        <div className="pt-20 px-4 md:px-8 lg:px-16">
+          <button
+            onClick={handleBack}
+            className="mb-4 flex items-center gap-2 text-gray-300 hover:text-white transition-colors"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            Back to {searchParams.get('from') === 'search' ? 'Search Results' : 'Home'}
+          </button>
+        </div>
+        
+        {/* Movie Details Background (blurred) */}
+        <div className="relative">
+          {backdrop && (
+            <div 
+              className="absolute inset-0 bg-cover bg-center bg-no-repeat blur-sm"
+              style={{ backgroundImage: `url(${backdrop})` }}
+            >
+              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/70 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-r from-black via-transparent to-black/50" />
+            </div>
+          )}
+          
+          <div className="relative z-10 pt-20 pb-8 px-4 md:px-8 lg:px-16">
+            <div className="max-w-7xl mx-auto">
+              <div className="flex flex-col lg:flex-row gap-8 items-start">
+                {/* Poster */}
+                <div className="flex-shrink-0">
+                  <img
+                    src={poster}
+                    alt={title}
+                    className="w-64 h-96 object-cover rounded-2xl shadow-2xl border border-white/10 blur-sm"
+                  />
+                </div>
+                
+                {/* Info */}
+                <div className="flex-1 space-y-6">
+                  <div>
+                    <h1 className="text-4xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent blur-sm">
+                      {title}
+                    </h1>
+                    <div className="flex items-center gap-4 text-lg text-gray-300 mb-6 blur-sm">
+                      <span>{new Date(date).getFullYear()}</span>
+                      <span>•</span>
+                      <div className="flex items-center gap-1">
+                        <span className="text-yellow-400">⭐</span>
+                        <span>{item.vote_average.toFixed(1)}</span>
+                      </div>
+                      <span>•</span>
+                      <span>{item.runtime || item.episode_run_time?.[0] || 'N/A'} min</span>
+                      <span>•</span>
+                      <span className="px-2 py-1 bg-red-600 text-white text-sm rounded">
+                        {isTV ? 'TV Series' : 'Movie'}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <p className="text-xl text-gray-200 leading-relaxed max-w-4xl blur-sm">
+                    {item.overview}
+                  </p>
+                  
+                  {item.genres && (
+                    <div className="flex flex-wrap gap-2 blur-sm">
+                      {item.genres.map((genre) => (
+                        <span
+                          key={genre.id}
+                          className="px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full text-sm border border-white/20"
+                        >
+                          {genre.name}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        {/* Loader Overlay */}
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
+          <Loader />
+        </div>
       </div>
     );
   }
@@ -224,7 +333,15 @@ const handleBack = () => {
   /* -------------------- RENDER -------------------- */
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 text-white">
-      <Navbar />
+              <Navbar 
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          onSearch={handleSearch}
+          onLogoClick={() => {
+            setSearchTerm('');
+            navigate('/');
+          }}
+        />
        <div className="pt-20 px-4 md:px-8 lg:px-16">
         <button
           onClick={handleBack}
