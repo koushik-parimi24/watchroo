@@ -14,6 +14,8 @@ const MovieCard = ({ movie, isLoading = false }) => {
   const { setIsLoading } = useLoading();
   const navigate = useNavigate();
 
+  if (isLoading || !movie) return <MovieCardSkeleton />;
+
   const id = movie?.id ?? movie?.media_id;
   const mediaType = movie?.media_type ?? (movie?.title ? 'movie' : 'tv');
   const title = movie?.original_title || movie?.original_name || movie?.title || movie?.name;
