@@ -43,15 +43,15 @@ export default function SimilarMovies({ id, type = 'movie' }) {
   if (similar.length === 0) return null;                     // nothing to show
 
   return (
-    <div className="bg-white/5 backdrop-blur-xl rounded-3xl p-6 border border-white/10 shadow-2xl">
-      <h2 className="text-3xl font-bold mb-8">Similar Movies For You</h2>
+    <div className="bg-white/5 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-4 sm:p-6 border border-white/10 shadow-2xl overflow-visible">
+      <h2 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8">Similar {type === 'tv' ? 'Shows' : 'Movies'} For You</h2>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4 md:gap-6 overflow-visible">
         {similar.map((m) => (
           <Link
             to={`/${type}/${m.id}`}
             key={m.id}
-            className="group relative overflow-hidden rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 transition-all hover:scale-105 hover:shadow-xl"
+            className="group relative overflow-visible rounded-xl sm:rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 transition-all hover:scale-105 hover:shadow-xl hover:z-[999] touch-manipulation"
           >
             <img
               src={
@@ -60,15 +60,15 @@ export default function SimilarMovies({ id, type = 'movie' }) {
                   : '/placeholder.png'
               }
               alt={m.title || m.name}
-              className="w-full h-56 object-cover"
+              className="w-full h-48 sm:h-56 object-cover"
             />
 
             {/* Gradient overlay */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
 
-            {/* Title + rating on hover */}
-            <div className="absolute bottom-0 left-0 right-0 p-3 opacity-0 group-hover:opacity-100 transition-opacity">
-              <p className="text-sm font-semibold truncate">
+            {/* Title + rating - Always visible on mobile, hover on desktop */}
+            <div className="absolute bottom-0 left-0 right-0 p-2 sm:p-3 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity bg-gradient-to-t from-black/90 to-transparent sm:bg-none">
+              <p className="text-xs sm:text-sm font-semibold truncate text-white">
                 {m.title || m.name}
               </p>
               <p className="text-xs text-yellow-400">⭐ {m.vote_average.toFixed(1)}</p>

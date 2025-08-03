@@ -54,14 +54,7 @@ useEffect(() => {
 }, [item, isLoadingDetails, dataLoaded]);
 
   const handleBack = () => {
-    const fromSearch = searchParams.get('from');
-    const query = searchParams.get('query');
-    
-    if (fromSearch === 'search' && query) {
-      navigate(`/?search=${encodeURIComponent(query)}`);
-    } else {
-      navigate(-1);
-    }
+    navigate(-1);
   };
 
   // Handle search from movie details page
@@ -242,22 +235,20 @@ useEffect(() => {
             navigate('/');
           }}
         />
-        <div className="pt-20 px-4 md:px-8 lg:px-16">
-          <button
-            onClick={handleBack}
-            className="mb-4 flex items-center gap-2 text-gray-300 hover:text-white transition-colors"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-            Back to {searchParams.get('from') === 'search' ? 'Search Results' : 'Home'}
-          </button>
-        </div>
+        {/* Floating Back Button */}
+        <button
+          onClick={handleBack}
+          className="fixed top-20 sm:top-24 left-4 sm:left-6 z-50 w-12 h-12 sm:w-14 sm:h-14 bg-black/50 backdrop-blur-xl border border-white/20 rounded-full flex items-center justify-center text-white hover:bg-black/70 hover:border-white/40 transition-all duration-300 shadow-lg hover:shadow-xl touch-manipulation"
+        >
+          <svg className="w-6 h-6 sm:w-7 sm:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
         
         {/* Movie Details Background (blurred) */}
         <div className="relative">
           {backdrop && (
-            <div 
+            <div
               className="absolute inset-0 bg-cover bg-center bg-no-repeat blur-sm"
               style={{ backgroundImage: `url(${backdrop})` }}
             >
@@ -266,50 +257,53 @@ useEffect(() => {
             </div>
           )}
           
-          <div className="relative z-10 pt-20 pb-8 px-4 md:px-8 lg:px-16">
+          <div className="relative z-10 pt-8 sm:pt-12 md:pt-20 pb-8 px-4 sm:px-6 md:px-8 lg:px-16">
             <div className="max-w-7xl mx-auto">
-              <div className="flex flex-col lg:flex-row gap-8 items-start">
+              <div className="flex flex-col md:flex-row gap-6 sm:gap-8 items-start">
                 {/* Poster */}
-                <div className="flex-shrink-0">
+                <div className="flex-shrink-0 mx-auto md:mx-0">
                   <img
                     src={poster}
                     alt={title}
-                    className="w-64 h-96 object-cover rounded-2xl shadow-2xl border border-white/10 blur-sm"
+                    className="w-48 h-72 sm:w-56 sm:h-84 md:w-64 md:h-96 object-cover rounded-2xl shadow-2xl border border-white/10 blur-sm"
                   />
                 </div>
                 
                 {/* Info */}
-                <div className="flex-1 space-y-6">
+                <div className="flex-1 space-y-4 sm:space-y-6 text-center md:text-left">
                   <div>
-                    <h1 className="text-4xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent blur-sm">
+                    <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-6xl font-bold mb-3 sm:mb-4 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent leading-tight blur-sm">
                       {title}
                     </h1>
-                    <div className="flex items-center gap-4 text-lg text-gray-300 mb-6 blur-sm">
-                      <span>{new Date(date).getFullYear()}</span>
-                      <span>•</span>
-                      <div className="flex items-center gap-1">
-                        <span className="text-yellow-400">⭐</span>
-                        <span>{item.vote_average.toFixed(1)}</span>
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-base sm:text-lg text-gray-300 mb-4 sm:mb-6 blur-sm">
+                      <div className="flex items-center justify-center md:justify-start gap-2">
+                        <span>{new Date(date).getFullYear()}</span>
+                        <span>•</span>
+                        <div className="flex items-center gap-1">
+                          <span className="text-yellow-400">⭐</span>
+                          <span>{item.vote_average.toFixed(1)}</span>
+                        </div>
                       </div>
-                      <span>•</span>
-                      <span>{item.runtime || item.episode_run_time?.[0] || 'N/A'} min</span>
-                      <span>•</span>
-                      <span className="px-2 py-1 bg-red-600 text-white text-sm rounded">
-                        {isTV ? 'TV Series' : 'Movie'}
-                      </span>
+                      <div className="flex items-center justify-center md:justify-start gap-2">
+                        <span>{item.runtime || item.episode_run_time?.[0] || 'N/A'} min</span>
+                        <span>•</span>
+                        <span className="px-2 py-1 bg-red-600 text-white text-xs sm:text-sm rounded">
+                          {isTV ? 'TV Series' : 'Movie'}
+                        </span>
+                      </div>
                     </div>
                   </div>
                   
-                  <p className="text-xl text-gray-200 leading-relaxed max-w-4xl blur-sm">
+                  <p className="text-base sm:text-sm md:text-sm text-gray-200 leading-relaxed max-w-4xl blur-sm">
                     {item.overview}
                   </p>
                   
                   {item.genres && (
-                    <div className="flex flex-wrap gap-2 blur-sm">
+                    <div className="flex flex-wrap gap-2 justify-center md:justify-start blur-sm">
                       {item.genres.map((genre) => (
                         <span
                           key={genre.id}
-                          className="px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full text-sm border border-white/20"
+                          className="px-3 sm:px-4 py-1.5 sm:py-2 bg-white/10 backdrop-blur-sm rounded-full text-xs sm:text-sm border border-white/20"
                         >
                           {genre.name}
                         </span>
@@ -342,21 +336,19 @@ useEffect(() => {
             navigate('/');
           }}
         />
-       <div className="pt-20 px-4 md:px-8 lg:px-16">
-        <button
-          onClick={handleBack}
-          className="mb-4 flex items-center gap-2 text-gray-300 hover:text-white transition-colors"
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
-          Back to {searchParams.get('from') === 'search' ? 'Search Results' : 'Home'}
-        </button>
-      </div>
+      {/* Floating Back Button */}
+      <button
+        onClick={handleBack}
+        className="fixed top-20 sm:top-24 left-4 sm:left-6 z-50 w-12 h-12 sm:w-14 sm:h-14 bg-black/50 backdrop-blur-xl border border-white/20 rounded-full flex items-center justify-center text-white hover:bg-black/70 hover:border-white/40 transition-all duration-300 shadow-lg hover:shadow-xl touch-manipulation"
+      >
+        <svg className="w-6 h-6 sm:w-7 sm:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+        </svg>
+      </button>
       {/* Hero Section */}
       <div className="relative">
         {backdrop && (
-          <div 
+          <div
             className="absolute inset-0 bg-cover bg-center bg-no-repeat"
             style={{ backgroundImage: `url(${backdrop})` }}
           >
@@ -365,50 +357,55 @@ useEffect(() => {
           </div>
         )}
         
-        <div className="relative z-10 pt-20 pb-8 px-4 md:px-8 lg:px-16">
+        <div className="relative z-10 pt-8 sm:pt-12 md:pt-20 pb-8 px-4 sm:px-6 md:px-8 lg:px-16">
           <div className="max-w-7xl mx-auto">
-            <div className="flex flex-col lg:flex-row gap-8 items-start">
+            <div className="flex flex-col md:flex-row gap-6 sm:gap-8 items-start">
               {/* Poster */}
-              <div className="flex-shrink-0">
+              <div className="flex-shrink-0 mx-auto md:mx-0">
                 <img
                   src={poster}
                   alt={title}
-                  className="w-64 h-96 object-cover rounded-2xl shadow-2xl border border-white/10"
+                  className="w-48 h-72 sm:w-56 sm:h-84 md:w-64 md:h-96 object-cover rounded-2xl shadow-2xl border border-white/10"
                 />
               </div>
               
               {/* Info */}
-              <div className="flex-1 space-y-6">
+              <div className="flex-1 space-y-4 sm:space-y-6 text-center md:text-left">
                 <div>
-                  <h1 className="text-4xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+                  <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-6xl font-bold mb-3 sm:mb-4 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent leading-tight">
                     {title}
                   </h1>
-                  <div className="flex items-center gap-4 text-lg text-gray-300 mb-6">
-                    <span>{new Date(date).getFullYear()}</span>
-                    <span>•</span>
-                    <div className="flex items-center gap-1">
-                      <span className="text-yellow-400">⭐</span>
-                      <span>{item.vote_average.toFixed(1)}</span>
+                  
+                  {/* Mobile-optimized metadata */}
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-base sm:text-lg text-gray-300 mb-4 sm:mb-6">
+                    <div className="flex items-center justify-center md:justify-start gap-2">
+                      <span>{new Date(date).getFullYear()}</span>
+                      <span>•</span>
+                      <div className="flex items-center gap-1">
+                        <span className="text-yellow-400">⭐</span>
+                        <span>{item.vote_average.toFixed(1)}</span>
+                      </div>
                     </div>
-                    <span>•</span>
-                    <span>{item.runtime || item.episode_run_time?.[0] || 'N/A'} min</span>
-                    <span>•</span>
-                    <span className="px-2 py-1 bg-red-600 text-white text-sm rounded">
-                      {isTV ? 'TV Series' : 'Movie'}
-                    </span>
+                    <div className="flex items-center justify-center md:justify-start gap-2">
+                      <span>{item.runtime || item.episode_run_time?.[0] || 'N/A'} min</span>
+                      <span>•</span>
+                      <span className="px-2 py-1 bg-red-600 text-white text-xs sm:text-xs rounded">
+                        {isTV ? 'TV Series' : 'Movie'}
+                      </span>
+                    </div>
                   </div>
                 </div>
                 
-                <p className="text-xl text-gray-200 leading-relaxed max-w-4xl">
+                <p className="text-base sm:text-sm md:text-sn text-gray-200 leading-loose max-w-4xl">
                   {item.overview}
                 </p>
                 
                 {item.genres && (
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-2 justify-center md:justify-start">
                     {item.genres.map((genre) => (
                       <span
                         key={genre.id}
-                        className="px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full text-sm border border-white/20"
+                        className="px-3 sm:px-4 py-1.5 sm:py-2 bg-white/10 backdrop-blur-sm rounded-full text-xs sm:text-sm border border-white/20"
                       >
                         {genre.name}
                       </span>
@@ -416,13 +413,13 @@ useEffect(() => {
                   </div>
                 )}
                 
-                {/* Action Buttons */}
-                <div className="flex flex-wrap gap-4 pt-4">
+                {/* Action Buttons - Mobile Optimized */}
+                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4 justify-center md:justify-start">
                   <button
-                    onClick={handleWatchNow} 
-                    className="flex items-center gap-3 bg-red-600 hover:bg-red-700 px-8 py-4 rounded-xl font-semibold text-lg transition-all transform hover:scale-105 shadow-lg"
+                    onClick={handleWatchNow}
+                    className="flex items-center justify-center gap-3 bg-red-600 hover:bg-red-700 active:bg-red-800 px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-semibold text-base sm:text-lg transition-all transform hover:scale-105 active:scale-95 shadow-lg min-h-[44px] touch-manipulation"
                   >
-                    <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M8 5v14l11-7z"/>
                     </svg>
                     {showPlayer ? 'Hide Player' : 'Watch Now'}
@@ -431,10 +428,10 @@ useEffect(() => {
                   {trailer && (
                     <button
                       onClick={() => setShowTrailer(!showTrailer)}
-                      className="flex items-center gap-3 bg-white/20 backdrop-blur-sm hover:bg-white/30 px-8 py-4 rounded-xl font-semibold text-lg transition-all border border-white/30"
+                      className="flex items-center justify-center gap-3 bg-white/20 backdrop-blur-sm hover:bg-white/30 active:bg-white/40 px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-semibold text-base sm:text-lg transition-all border border-white/30 min-h-[44px] touch-manipulation"
                     >
-                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                      <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 002 2v8a2 2 0 002 2z" />
                       </svg>
                       {showTrailer ? 'Hide Trailer' : 'Watch Trailer'}
                     </button>
@@ -451,9 +448,10 @@ useEffect(() => {
           
           {/* Video Player */}
           {showPlayer && (
-            <div className="bg-white/5 backdrop-blur-xl rounded-3xl p-6 border border-white/10 shadow-2xl">
-              <div className="relative w-full bg-black rounded-2xl overflow-hidden shadow-2xl">
-                <div className="relative pb-[56.25%] h-0">
+            <div className="bg-white/5 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-4 sm:p-6 border border-white/10 shadow-2xl">
+              <div className="relative w-full bg-black rounded-xl sm:rounded-2xl overflow-hidden shadow-2xl">
+                {/* Mobile-optimized aspect ratio */}
+                <div className="relative pb-[56.25%] sm:pb-[56.25%] h-0">
                   <iframe
                     src={getCurrentStreamUrl()}
                     title={`Watch ${title}`}
@@ -471,22 +469,22 @@ useEffect(() => {
                 </div>
               </div>
               
-              {/* Server Selection */}
-              <div className="mt-6">
-                <h3 className="text-xl font-semibold mb-4">Choose Server</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {/* Server Selection - Mobile Optimized */}
+              <div className="mt-4 sm:mt-6">
+                <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Choose Server</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                   {Object.entries(streamingServers).map(([key, srv]) => (
                     <button
                       key={key}
                       onClick={() => setSelectedServer(key)}
-                      className={`p-4 rounded-xl border transition-all ${
+                      className={`p-3 sm:p-4 rounded-xl border transition-all min-h-[44px] touch-manipulation ${
                         selectedServer === key
                           ? 'bg-red-600 text-white border-red-500 shadow-lg shadow-red-500/25'
-                          : 'bg-white/5 backdrop-blur-sm text-white border-white/20 hover:bg-white/10'
+                          : 'bg-white/5 backdrop-blur-sm text-white border-white/20 hover:bg-white/10 active:bg-white/15'
                       }`}
                     >
-                      <div className="font-semibold text-lg">{srv.name}</div>
-                      <div className="text-sm opacity-75 mt-1">
+                      <div className="font-semibold text-base sm:text-lg">{srv.name}</div>
+                      <div className="text-xs sm:text-sm opacity-75 mt-1">
                         {srv.quality} • {srv.ads} ads
                       </div>
                     </button>
@@ -498,10 +496,10 @@ useEffect(() => {
 
           {/* Trailer */}
           {showTrailer && trailer && (
-            <div className="bg-white/5 backdrop-blur-xl rounded-3xl p-6 border border-white/10 shadow-2xl">
-              <h2 className="text-2xl font-bold mb-6">Official Trailer</h2>
+            <div className="bg-white/5 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-4 sm:p-6 border border-white/10 shadow-2xl">
+              <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">Official Trailer</h2>
               <div className="relative w-full max-w-4xl mx-auto">
-                <div className="relative pb-[56.25%] h-0 overflow-hidden rounded-2xl shadow-2xl">
+                <div className="relative pb-[56.25%] h-0 overflow-hidden rounded-xl sm:rounded-2xl shadow-2xl">
                   <iframe
                     src={`https://www.youtube.com/embed/${trailer.key}?rel=0&modestbranding=1`}
                     title={`${title} Trailer`}
@@ -517,50 +515,50 @@ useEffect(() => {
 
           {/* TV Seasons & Episodes */}
           {isTV && item.seasons && (
-            <div className="bg-white/5 backdrop-blur-xl rounded-3xl p-6 border border-white/10 shadow-2xl">
-              <h2 className="text-3xl font-bold mb-8">Seasons & Episodes</h2>
+            <div className="bg-white/5 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-4 sm:p-6 border border-white/10 shadow-2xl">
+              <h2 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8">Seasons & Episodes</h2>
               
-              {/* Season Selection */}
-              <div className="mb-8">
-                <h3 className="text-xl font-semibold mb-4">Select Season</h3>
-                <div className="flex flex-wrap gap-3">
+              {/* Season Selection - Mobile Optimized */}
+              <div className="mb-6 sm:mb-8">
+                <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Select Season</h3>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-3">
                   {item.seasons
                     .filter((s) => s.season_number > 0)
                     .map((s) => (
                       <button
                         key={s.id}
                         onClick={() => setSelectedSeason(s.season_number)}
-                        className={`px-6 py-3 rounded-xl border transition-all ${
+                        className={`p-3 sm:px-6 sm:py-3 rounded-xl border transition-all min-h-[44px] touch-manipulation ${
                           selectedSeason === s.season_number
                             ? 'bg-red-600 text-white border-red-500 shadow-lg'
-                            : 'bg-white/5 backdrop-blur-sm text-white border-white/20 hover:bg-white/10'
+                            : 'bg-white/5 backdrop-blur-sm text-white border-white/20 hover:bg-white/10 active:bg-white/15'
                         }`}
                       >
-                        <div className="font-semibold">Season {s.season_number}</div>
+                        <div className="font-semibold text-sm sm:text-base">Season {s.season_number}</div>
                         <div className="text-xs opacity-75 mt-1">
-                          {s.episode_count} episodes
+                          {s.episode_count} ep{s.episode_count !== 1 ? 's' : ''}
                         </div>
                       </button>
                     ))}
                 </div>
               </div>
 
-              {/* Episode Selection */}
+              {/* Episode Selection - Mobile Optimized */}
               {seasonData?.episodes?.length > 0 && !loadingSeason && (
-                <div className="mb-6">
-                  <h3 className="text-xl font-semibold mb-4">Select Episode</h3>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 max-h-96 overflow-y-auto">
+                <div className="mb-4 sm:mb-6">
+                  <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Select Episode</h3>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-6 gap-2 sm:gap-3 max-h-80 sm:max-h-96 overflow-y-auto scrollbar-hide">
                     {seasonData.episodes.map((ep) => (
                       <button
                         key={ep.id}
                         onClick={() => setSelectedEpisode(ep.episode_number)}
-                        className={`p-4 rounded-xl border transition-all text-left ${
+                        className={`p-3 sm:p-4 rounded-xl border transition-all text-left min-h-[44px] touch-manipulation ${
                           selectedEpisode === ep.episode_number
                             ? 'bg-red-600 text-white border-red-500 shadow-lg'
-                            : 'bg-white/5 backdrop-blur-sm text-white border-white/20 hover:bg-white/10'
+                            : 'bg-white/5 backdrop-blur-sm text-white border-white/20 hover:bg-white/10 active:bg-white/15'
                         }`}
                       >
-                        <div className="font-semibold">Ep {ep.episode_number}</div>
+                        <div className="font-semibold text-sm sm:text-base">Ep {ep.episode_number}</div>
                         <div className="text-xs opacity-75 mt-1 truncate" title={ep.name}>
                           {ep.name}
                         </div>
@@ -570,12 +568,12 @@ useEffect(() => {
                 </div>
               )}
 
-              {/* Current Selection */}
-              <div className="bg-gradient-to-r from-red-600/20 to-purple-600/20 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
-                <div className="flex items-center justify-between">
+              {/* Current Selection - Mobile Optimized */}
+              <div className="bg-gradient-to-r from-red-600/20 to-purple-600/20 backdrop-blur-sm rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-white/20">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                   <div>
-                    <h4 className="text-lg font-semibold">Now Playing</h4>
-                    <p className="text-gray-300">
+                    <h4 className="text-base sm:text-lg font-semibold">Now Playing</h4>
+                    <p className="text-sm sm:text-base text-gray-300">
                       Season {selectedSeason}, Episode {selectedEpisode}
                       {(() => {
                         const ep = seasonData?.episodes?.find(
@@ -588,7 +586,7 @@ useEffect(() => {
                   {loadingSeason && (
                     <div className="flex items-center gap-2">
                       <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                      <span className="text-sm">Loading episodes...</span>
+                      <span className="text-xs sm:text-sm">Loading episodes...</span>
                     </div>
                   )}
                 </div>
@@ -598,57 +596,56 @@ useEffect(() => {
 
           {/* Cast */}
           {item.credits?.cast?.length > 0 && (
-            <div className="bg-white/5 backdrop-blur-xl rounded-3xl p-6 border border-white/10 shadow-2xl">
-              <h2 className="text-3xl font-bold mb-8">Cast</h2>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
+            <div className="bg-white/5 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-4 sm:p-6 border border-white/10 shadow-2xl overflow-visible">
+              <h2 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8">Cast</h2>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4 md:gap-6 overflow-visible">
                 {item.credits.cast.slice(0, 12).map((actor) => (
-                  <div key={actor.id} className="group cursor-pointer">
-                    <div className="relative overflow-hidden rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 transition-all group-hover:scale-105 group-hover:shadow-xl">
+                  <div key={actor.id} className="group cursor-pointer relative hover:z-[999]">
+                    <div className="relative overflow-visible rounded-xl sm:rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 transition-all group-hover:scale-105 group-hover:shadow-xl touch-manipulation">
                       <img
                         src={
                           actor.profile_path
                             ? `https://image.tmdb.org/t/p/w185${actor.profile_path}`
-                            : '/fallback-user.png'
+                            : '/placeholder.png'
                         }
                         alt={actor.name}
-                        className="w-full h-48 object-cover"
+                        className="w-full h-40 sm:h-48 object-cover"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                      <div className="p-4">
-                        <p className="font-semibold text-white truncate">{actor.name}</p>
-                        <p className="text-sm text-gray-400 truncate">{actor.character}</p>
+                      <div className="p-3 sm:p-4">
+                        <p className="font-semibold text-white truncate text-sm sm:text-base">{actor.name}</p>
+                        <p className="text-xs sm:text-sm text-gray-400 truncate">{actor.character}</p>
                       </div>
                     </div>
                   </div>
                 ))}
-
               </div>
             </div>
           )}
 
-          {/* Additional Info */}
-          <div className="grid md:grid-cols-2 gap-8">
-            <div className="bg-white/5 backdrop-blur-xl rounded-3xl p-6 border border-white/10 shadow-2xl">
-              <h3 className="text-2xl font-bold mb-6">Details</h3>
-              <div className="space-y-4">
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Status:</span>
-                  <span className="font-semibold">{item.status}</span>
+          {/* Additional Info - Mobile Optimized */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 md:gap-8">
+            <div className="bg-white/5 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-4 sm:p-6 border border-white/10 shadow-2xl">
+              <h3 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">Details</h3>
+              <div className="space-y-3 sm:space-y-4">
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-400 text-sm sm:text-base">Status:</span>
+                  <span className="font-semibold text-sm sm:text-base">{item.status}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Runtime:</span>
-                  <span className="font-semibold">
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-400 text-sm sm:text-base">Runtime:</span>
+                  <span className="font-semibold text-sm sm:text-base">
                     {item.runtime || item.episode_run_time?.[0] || 'N/A'} min
                   </span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Rating:</span>
-                  <span className="font-semibold">⭐ {item.vote_average.toFixed(1)}/10</span>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-400 text-sm sm:text-base">Rating:</span>
+                  <span className="font-semibold text-sm sm:text-base">⭐ {item.vote_average.toFixed(1)}/10</span>
                 </div>
                 {item.budget > 0 && (
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Budget:</span>
-                    <span className="font-semibold">
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-400 text-sm sm:text-base">Budget:</span>
+                    <span className="font-semibold text-sm sm:text-base">
                       ${item.budget.toLocaleString()}
                     </span>
                   </div>
@@ -657,8 +654,8 @@ useEffect(() => {
             </div>
 
             {item.production_companies?.length > 0 && (
-              <div className="bg-white/5 backdrop-blur-xl rounded-3xl p-6 border border-white/10 shadow-2xl">
-                <h3 className="text-2xl font-bold mb-6">Production</h3>
+              <div className="bg-white/5 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-4 sm:p-6 border border-white/10 shadow-2xl">
+                <h3 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">Production</h3>
                 <div className="space-y-3">
                   {item.production_companies.slice(0, 5).map((company) => (
                     <div key={company.id} className="flex items-center gap-3">
@@ -666,17 +663,15 @@ useEffect(() => {
                         <img
                           src={`https://image.tmdb.org/t/p/w92${company.logo_path}`}
                           alt={company.name}
-                          className="w-8 h-8 object-contain bg-white rounded p-1"
+                          className="w-6 h-6 sm:w-8 sm:h-8 object-contain bg-white rounded p-1 flex-shrink-0"
                         />
                       )}
-                      <span className="font-medium">{company.name}</span>
+                      <span className="font-medium text-sm sm:text-base">{company.name}</span>
                     </div>
                   ))}
-                  
                 </div>
               </div>
             )}
-                           
           </div>
            <SimilarMovies id={id} type={type}  />
         </div>

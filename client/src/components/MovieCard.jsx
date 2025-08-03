@@ -40,7 +40,7 @@ const MovieCard = ({ movie, isLoading = false }) => {
       initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: 'easeOut' }}
-      className="card-3d relative"
+      className="card-3d relative hover:z-[999]"
     >
       <Link to={`/${mediaType}/${id}`} onClick={() => setIsLoading(true)} className="block">
         <div className="card-inner bg-white/10 backdrop-blur-md border border-white/20 p-4 rounded-2xl shadow-lg hover:shadow-2xl transition">
