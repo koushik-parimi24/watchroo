@@ -9,25 +9,22 @@ export default function Hero({
 }) {
   const videoRef = useRef(null);
   const [isMuted, setIsMuted] = useState(true);
-  const [shouldPlay, setShouldPlay] = useState(false);
+  const [videoPlayed, setVideoPlayed] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      setShouldPlay(true);
-      if (videoRef.current) {
+      if (videoRef.current && !videoPlayed) {
         videoRef.current.playbackRate = 0.8;
         videoRef.current.play().catch(console.error);
-
         setTimeout(() => {
           if (videoRef.current) {
             videoRef.current.playbackRate = 1;
           }
         }, 1000);
       }
-    }, 2000); // delay video to prioritize content rendering
-
+    }, 2000);
     return () => clearTimeout(timer);
-  }, []);
+  }, [videoPlayed]);
 
   const toggleSound = () => {
     if (videoRef.current) {
@@ -38,16 +35,18 @@ export default function Hero({
 
   return (
     <section className="relative w-full h-[70vh] sm:h-[80vh] md:h-[85vh] lg:h-[90vh] overflow-hidden flex items-center justify-center text-center px-4">
-      <video
-        src="/hero.mp4"
-        className="absolute inset-0 w-full h-full object-cover object-center"
-        loop
-        playsInline
-        muted
-        ref={videoRef}
-        preload="none"
-        style={{ transform: 'translate3d(0,0,0)' }}
-      />
+      {!videoPlayed && (
+        <video
+          src=""
+          className="absolute inset-0 w-full h-full object-cover object-center"
+          playsInline
+          muted
+          ref={videoRef}
+          preload="none"
+          style={{ transform: 'translate3d(0,0,0)' }}
+          onEnded={() => setVideoPlayed(true)}
+        />
+      )}
 
       <div className="absolute inset-0 bg-black/40 sm:bg-black/30 md:bg-black/25 z-10" />
       <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/60 z-10" />
