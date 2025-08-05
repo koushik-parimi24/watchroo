@@ -415,15 +415,7 @@ useEffect(() => {
                 
                 {/* Action Buttons - Mobile Optimized */}
                 <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4 justify-center md:justify-start">
-                  <button
-                    onClick={handleWatchNow}
-                    className="flex items-center justify-center gap-3 bg-red-600 hover:bg-red-700 active:bg-red-800 px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-semibold text-base sm:text-lg transition-all transform hover:scale-105 active:scale-95 shadow-lg min-h-[44px] touch-manipulation"
-                  >
-                    <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M8 5v14l11-7z"/>
-                    </svg>
-                    {showPlayer ? 'Hide Player' : 'Watch Now'}
-                  </button>
+
                   
                   {trailer && (
                     <button
