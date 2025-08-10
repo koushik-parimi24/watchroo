@@ -9,7 +9,7 @@ import SkeletonGrid from './components/SkeletonGrid';
 import RecentlyWatched from './components/RecentlyWatched'
 import Hero from './components/Hero'
 import ScrollableSection from './components/ScrollableSection'
-import LoadMoreButton from './components/LoadMoreButton'
+import { useInfiniteScroll } from './hooks/useInfiniteScroll'
 
 
 const API_KEY = import.meta.env.VITE_TMDB_API_KEY
@@ -48,11 +48,18 @@ function App() {
   const [hasMoreTopMovies, setHasMoreTopMovies] = useState(true);
   const [hasMoreTopTvShows, setHasMoreTopTvShows] = useState(true);
   
+  // Search/Filter pagination
+  const [searchPage, setSearchPage] = useState(1);
+  const [hasMoreSearchResults, setHasMoreSearchResults] = useState(true);
+  
   // Additional content states for new sections
   const [additionalMovies, setAdditionalMovies] = useState([]);
   const [additionalTvShows, setAdditionalTvShows] = useState([]);
   const [additionalTopMovies, setAdditionalTopMovies] = useState([]);
   const [additionalTopTvShows, setAdditionalTopTvShows] = useState([]);
+  
+  // Infinite scroll loading state
+  const [infiniteLoadingDisabled, setInfiniteLoadingDisabled] = useState(false);
   
   // Filter states
   const [filters, setFilters] = useState({
@@ -63,10 +70,12 @@ function App() {
     mediaType: 'all'
   });
 
-  const handleSearch = async() =>{
+  const handleSearch = async(page = 1, append = false) =>{
     if(!searchTerm.trim()){
       setIsSearching(false); 
       setIsFiltering(false);
+      setSearchPage(1);
+      setHasMoreSearchResults(true);
       fetchMovies();
       fetchTvShows();
       return;
@@ -74,17 +83,28 @@ function App() {
 
     try{
       setSearchLoading(true);
-      setIsSearching(true);
-      setIsFiltering(false);
-      setSearchParams({ search: searchTerm });
+      if (page === 1) {
+        setIsSearching(true);
+        setIsFiltering(false);
+        setSearchParams({ search: searchTerm });
+      }
       
-      const endpoint = `${API_URL_BASE}/search/multi?query=${encodeURIComponent(searchTerm)}`
+      const endpoint = `${API_URL_BASE}/search/multi?query=${encodeURIComponent(searchTerm)}&page=${page}`
       const response = await fetch(endpoint,API_OPTIONS);
       if (!response.ok) throw new Error("Search request failed");
 
       const data = await response.json();
-      setMovies(data.results);
-      if(data.results.length === 0){
+      
+      if (append) {
+        setMovies(prev => [...prev, ...data.results]);
+      } else {
+        setMovies(data.results);
+      }
+      
+      setSearchPage(page);
+      setHasMoreSearchResults(data.page < data.total_pages);
+      
+      if(data.results.length === 0 && page === 1){
         setErrorMessage(`No results found for "${searchTerm}"`);
       }else{
         setErrorMessage('');
@@ -96,6 +116,13 @@ function App() {
       setSearchLoading(false);
     }
   }
+
+  // Load more search results
+  const loadMoreSearchResults = async () => {
+    if (hasMoreSearchResults && searchTerm.trim()) {
+      await handleSearch(searchPage + 1, true);
+    }
+  };
 
   const handleFilter = async (newFilters) => {
     setFilters(newFilters);
@@ -311,6 +338,9 @@ function App() {
     setIsSearching(false);
     setSearchTerm('');
     setErrorMessage('');
+    setInfiniteLoadingDisabled(false);
+    setSearchPage(1);
+    setHasMoreSearchResults(true);
     fetchMovies();
     fetchTvShows();
   };
@@ -371,6 +401,23 @@ function App() {
     await Promise.all(promises);
   };
 
+  // Infinite scroll implementation
+  const hasMoreContent = hasMoreMovies || hasMoreTvShows || hasMoreTopMovies || hasMoreTopTvShows;
+  const shouldEnableInfiniteScroll = !infiniteLoadingDisabled && hasMoreContent && !isSearching && !isFiltering;
+  const shouldEnableSearchScroll = !infiniteLoadingDisabled && hasMoreSearchResults && (isSearching || isFiltering);
+  
+  const { isLoading: isInfiniteLoading } = useInfiniteScroll(
+    loadMoreAll,
+    shouldEnableInfiniteScroll,
+    300 // Trigger when 300px from bottom
+  );
+
+  const { isLoading: isSearchInfiniteLoading } = useInfiniteScroll(
+    isSearching ? loadMoreSearchResults : loadMoreAll,
+    shouldEnableSearchScroll,
+    300 // Trigger when 300px from bottom
+  );
+
   // Check for search parameter in URL on component mount
   useEffect(() => {
     const urlSearchTerm = searchParams.get('search');
@@ -378,28 +425,8 @@ function App() {
       setSearchTerm(urlSearchTerm);
       // Perform search automatically when URL has search parameter
       const performSearch = async () => {
-        try {
-          setSearchLoading(true);
-          setIsSearching(true);
-          setIsFiltering(false);
-          
-          const endpoint = `${API_URL_BASE}/search/multi?query=${encodeURIComponent(urlSearchTerm)}`
-          const response = await fetch(endpoint, API_OPTIONS);
-          if (!response.ok) throw new Error("Search request failed");
-
-          const data = await response.json();
-          setMovies(data.results);
-          if(data.results.length === 0){
-            setErrorMessage(`No results found for "${urlSearchTerm}"`);
-          }else{
-            setErrorMessage('');
-          }
-        }catch(error){
-          console.error("Error Searching:",error);
-          setErrorMessage("Search failed. Please try again later")
-        } finally {
-          setSearchLoading(false);
-        }
+        setSearchTerm(urlSearchTerm);
+        await handleSearch(1, false);
       };
       
       performSearch();
@@ -475,138 +502,177 @@ function App() {
   )}
 
   {/* Main Content */}
-  <section className={`wrapper px-4 ${isSearching ? 'pt-20' : ''}`}>
-    {errorMessage && <p className="text-red-400 py-2">{errorMessage}</p>}
+  <section className={`content-padding ${isSearching ? 'pt-24 sm:pt-28' : 'pt-4'} pb-16 animate-fade-in`}>
+    <div className="max-w-7xl mx-auto">
+      {errorMessage && (
+        <div className="glass-card rounded-xl p-4 mb-8 border-l-4 border-red-500/50 animate-slide-up">
+          <p className="text-red-400 flex items-center gap-2">
+            <span>⚠️</span>
+            {errorMessage}
+          </p>
+        </div>
+      )}
 
-    {(isSearching || isFiltering) ? (
-      <>
-        {(searchLoading || filterLoading) ? (
-          <SkeletonGrid count={12} className="py-8" />
-        ) : (
-          <>
-            <ScrollableSection
-              title={isSearching ? 'Search Results' : 'Filtered Results'}
-              items={movies}
-              containerId="search-results-scroll"
-              loading={false}
-              skeletonCount={12}
-              MovieCardComponent={MovieCard}
-            />
-            {movies.length > 0 && (
-              <LoadMoreButton
-                onLoadMore={() => {
-                  // For search results, we could implement pagination here
-                  console.log('Load more search results');
-                }}
+      {(isSearching || isFiltering) ? (
+        <div className="animate-slide-up">
+          {(searchLoading || filterLoading) ? (
+            <SkeletonGrid count={12} className="section-spacing" />
+          ) : (
+            <>
+              <ScrollableSection
+                title={isSearching ? '🔍 Search Results' : '🎯 Filtered Results'}
+                items={movies}
+                containerId="search-results-scroll"
                 loading={false}
-                hasMore={false} // Set to true if you implement search pagination
-              >
-                Load More Results
-              </LoadMoreButton>
-            )}
-          </>
-        )}
-      </>
-    ) : (
-      <>
-        <div className="space-y-12">
-          <RecentlyWatched />
-
-          <ScrollableSection
-            title="Popular Movies"
-            items={movies}
-            containerId="popular-movies-scroll"
-            loading={initialLoading}
-            skeletonCount={12}
-            MovieCardComponent={MovieCard}
-          />
-
-          <ScrollableSection
-            title="Top Movies"
-            items={topMovies}
-            containerId="top-movies-scroll"
-            loading={initialLoading}
-            skeletonCount={8}
-            MovieCardComponent={MovieCard}
-          />
-
-          <ScrollableSection
-            title="Top TV Shows"
-            items={topTvShow}
-            containerId="top-tv-scroll"
-            loading={initialLoading}
-            skeletonCount={8}
-            MovieCardComponent={MovieCard}
-          />
-
-          <ScrollableSection
-            title="Popular TV Shows"
-            items={tvShows}
-            containerId="popular-tv-scroll"
-            loading={initialLoading}
-            skeletonCount={12}
-            MovieCardComponent={MovieCard}
-          />
-
-          {/* Single Load More Button for all sections */}
-          <LoadMoreButton
-            onLoadMore={loadMoreAll}
-            loading={initialLoading}
-            hasMore={hasMoreMovies || hasMoreTvShows || hasMoreTopMovies || hasMoreTopTvShows}
-          >
-            Load More Content
-          </LoadMoreButton>
-
-          {/* Additional Movies Section */}
-          {additionalMovies.length > 0 && (
-            <ScrollableSection
-              title="More Popular Movies"
-              items={additionalMovies}
-              containerId="additional-movies-scroll"
-              loading={false}
-              skeletonCount={12}
-              MovieCardComponent={MovieCard}
-            />
-          )}
-
-          {/* Additional Top Movies Section */}
-          {additionalTopMovies.length > 0 && (
-            <ScrollableSection
-              title="More Top Movies"
-              items={additionalTopMovies}
-              containerId="additional-top-movies-scroll"
-              loading={false}
-              skeletonCount={8}
-              MovieCardComponent={MovieCard}
-            />
-          )}
-
-          {/* Additional Top TV Shows Section */}
-          {additionalTopTvShows.length > 0 && (
-            <ScrollableSection
-              title="More Top TV Shows"
-              items={additionalTopTvShows}
-              containerId="additional-top-tv-scroll"
-              loading={false}
-              skeletonCount={8}
-              MovieCardComponent={MovieCard}
-            />
-          )}
-
-          {/* Additional TV Shows Section */}
-          {additionalTvShows.length > 0 && (
-            <ScrollableSection
-              title="More Popular TV Shows"
-              items={additionalTvShows}
-              containerId="additional-tv-scroll"
-              loading={false}
-              skeletonCount={12}
-              MovieCardComponent={MovieCard}
-            />
+                skeletonCount={12}
+                MovieCardComponent={MovieCard}
+              />
+              
+              {/* Search Infinite Scroll Loading Indicator */}
+              {isSearchInfiniteLoading && (
+                <div className="flex justify-center py-8 animate-fade-in">
+                  <div className="glass-card rounded-2xl px-6 py-4 flex items-center gap-3">
+                    <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    <span className="text-white font-medium">Loading more results...</span>
+                  </div>
+                </div>
+              )}
+              
+              {/* End of search results indicator */}
+              {!hasMoreSearchResults && movies.length > 0 && !searchLoading && (isSearching || isFiltering) && (
+                <div className="flex justify-center py-8 animate-fade-in">
+                  <div className="glass-subtle rounded-2xl px-6 py-4 text-center">
+                    <span className="text-gray-400">🔍 End of search results</span>
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </div>
-      </>
-    )}
+      ) : (
+        <div className="space-y-16 sm:space-y-20">
+          <div className="animate-slide-up">
+            <RecentlyWatched />
+          </div>
+
+          <div className="animate-slide-up" style={{ animationDelay: '0.1s' }}>
+            <ScrollableSection
+              title="🔥 Popular Movies"
+              items={movies}
+              containerId="popular-movies-scroll"
+              loading={initialLoading}
+              skeletonCount={12}
+              MovieCardComponent={MovieCard}
+            />
+          </div>
+
+          <div className="animate-slide-up" style={{ animationDelay: '0.2s' }}>
+            <ScrollableSection
+              title="⭐ Top Movies"
+              items={topMovies}
+              containerId="top-movies-scroll"
+              loading={initialLoading}
+              skeletonCount={8}
+              MovieCardComponent={MovieCard}
+            />
+          </div>
+
+          <div className="animate-slide-up" style={{ animationDelay: '0.3s' }}>
+            <ScrollableSection
+              title="📺 Top TV Shows"
+              items={topTvShow}
+              containerId="top-tv-scroll"
+              loading={initialLoading}
+              skeletonCount={8}
+              MovieCardComponent={MovieCard}
+            />
+          </div>
+
+          <div className="animate-slide-up" style={{ animationDelay: '0.4s' }}>
+            <ScrollableSection
+              title="🍿 Popular TV Shows"
+              items={tvShows}
+              containerId="popular-tv-scroll"
+              loading={initialLoading}
+              skeletonCount={12}
+              MovieCardComponent={MovieCard}
+            />
+          </div>
+
+          {/* Infinite Scroll Loading Indicator */}
+          {isInfiniteLoading && (
+            <div className="flex justify-center py-8 animate-fade-in">
+              <div className="glass-card rounded-2xl px-6 py-4 flex items-center gap-3">
+                <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                <span className="text-white font-medium">Loading more content...</span>
+              </div>
+            </div>
+          )}
+          
+          {/* End of content indicator */}
+          {!hasMoreContent && !initialLoading && (
+            <div className="flex justify-center py-8 animate-fade-in">
+              <div className="glass-subtle rounded-2xl px-6 py-4 text-center">
+                <span className="text-gray-400">🎬 You've reached the end of our collection</span>
+              </div>
+            </div>
+          )}
+
+          {/* Additional Sections */}
+          {additionalMovies.length > 0 && (
+            <div className="animate-slide-up">
+              <ScrollableSection
+                title="🎬 More Popular Movies"
+                items={additionalMovies}
+                containerId="additional-movies-scroll"
+                loading={false}
+                skeletonCount={12}
+                MovieCardComponent={MovieCard}
+              />
+            </div>
+          )}
+
+          {additionalTopMovies.length > 0 && (
+            <div className="animate-slide-up">
+              <ScrollableSection
+                title="🏆 More Top Movies"
+                items={additionalTopMovies}
+                containerId="additional-top-movies-scroll"
+                loading={false}
+                skeletonCount={8}
+                MovieCardComponent={MovieCard}
+              />
+            </div>
+          )}
+
+          {additionalTopTvShows.length > 0 && (
+            <div className="animate-slide-up">
+              <ScrollableSection
+                title="🏅 More Top TV Shows"
+                items={additionalTopTvShows}
+                containerId="additional-top-tv-scroll"
+                loading={false}
+                skeletonCount={8}
+                MovieCardComponent={MovieCard}
+              />
+            </div>
+          )}
+
+          {additionalTvShows.length > 0 && (
+            <div className="animate-slide-up">
+              <ScrollableSection
+                title="📺 More Popular TV Shows"
+                items={additionalTvShows}
+                containerId="additional-tv-scroll"
+                loading={false}
+                skeletonCount={12}
+                MovieCardComponent={MovieCard}
+              />
+            </div>
+          )}
+        </div>
+      )}
+    </div>
   </section>
 </main>
 

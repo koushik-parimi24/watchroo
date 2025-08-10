@@ -37,7 +37,7 @@ export default function Hero({
     <section className="relative w-full h-[70vh] sm:h-[80vh] md:h-[85vh] lg:h-[90vh] overflow-hidden flex items-center justify-center text-center px-4">
       {!videoPlayed && (
         <video
-          src=""
+          src="/hero.mp4"
           className="absolute inset-0 w-full h-full object-cover object-center"
           playsInline
           muted
