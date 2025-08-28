@@ -1,0 +1,16 @@
+{
+  "name": "watchroo-torrent-api",
+  "version": "1.0.0",
+  "description": "A torrent scraping API for Watchroo",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "axios": "^0.21.1",
+    "cheerio": "^1.0.0-rc.10",
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "node-fetch": "^2.7.0"
+  }
+}

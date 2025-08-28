@@ -7,7 +7,9 @@ import MovieDetailsSkeleton from '@/components/animations/MovieDetailsSkeleton';
 import SimilarMovies from '@/components/SimilarMovies';
 import { useRecentlyWatched } from '@/context/RecentlyWatchedContext';
 import Loader from '@/components/animations/Loader';
-// -------------------- API CONFIG --------------------
+import TorrentSearch from '@/components/TorrentSearch'; // Import the new component
+
+// ... (keep the existing API configuration)
 const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
 const API_URL_BASE = 'https://api.themoviedb.org/3';
 const API_OPTIONS = {
@@ -19,6 +21,7 @@ const API_OPTIONS = {
 };
 
 function MovieDetails() {
+  // ... (keep all existing state and hooks)
   const { id } = useParams();
   const location = useLocation();
   const [searchParams] = useSearchParams();
@@ -42,6 +45,8 @@ function MovieDetails() {
   const isTV = location.pathname.startsWith('/tv');
   const type = isTV ? 'tv' : 'movie';
 
+
+  // ... (keep all existing functions: useEffects, handleBack, handleSearch, etc.)
 useEffect(() => {
   // Show loader for at least 1 second, then hide when data is loaded
   if (dataLoaded && item && !isLoadingDetails) {
@@ -204,11 +209,10 @@ useEffect(() => {
     }
   };
 
-  /* -------------------- EARLY RETURNS -------------------- */
+
   if (error) return <div className="text-red-400 p-4 text-center">{error}</div>;
   if (!item) return <MovieDetailsSkeleton />;
 
-  /* -------------------- BASIC DERIVED DATA -------------------- */
   const title = item.title || item.name;
   const date = item.release_date || item.first_air_date;
   const poster = item.poster_path
@@ -222,7 +226,6 @@ useEffect(() => {
       (v) => v.type === 'Trailer' && v.site === 'YouTube'
     ) || item.videos?.results?.find((v) => v.site === 'YouTube');
 
-// loader?
   if (showLoader) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 text-white">
@@ -324,10 +327,9 @@ useEffect(() => {
     );
   }
 
-  /* -------------------- RENDER -------------------- */
   return (
     <div className="min-h-screen text-white animate-fade-in">
-      <Navbar 
+      <Navbar
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
         onSearch={handleSearch}
@@ -337,8 +339,9 @@ useEffect(() => {
         }}
       />
       
-      {/* Floating Back Button */}
-      <button
+      {/* ... (keep existing Navbar and Back Button) ... */}
+       {/* Floating Back Button */}
+       <button
         onClick={handleBack}
         className="fixed top-20 sm:top-24 left-4 sm:left-6 z-50 glass-hover w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center text-white transition-all duration-300 shadow-lg hover:shadow-xl touch-manipulation group"
       >
@@ -346,7 +349,8 @@ useEffect(() => {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
         </svg>
       </button>
-      {/* Hero Section */}
+
+      {/* ... (keep existing Hero Section) ... */}
       <div className="relative overflow-hidden pt-20 sm:pt-24 md:pt-28">
         {backdrop && (
           <div
@@ -453,12 +457,12 @@ useEffect(() => {
           </div>
         </div>
       </div>
-
       <div className="content-padding pb-20">
         <div className="max-w-7xl mx-auto space-y-16 sm:space-y-20">
           
-          {/* Video Player */}
-          {showPlayer && (
+          {/* ... (keep existing Video Player, Trailer, TV Seasons sections) ... */}
+           {/* Video Player */}
+           {showPlayer && (
             <div className="glass rounded-3xl card-spacing border border-white/10 shadow-2xl animate-slide-up">
               <div className="mb-6">
                 <h2 className="text-2xl sm:text-3xl font-bold text-gradient mb-2">🎬 Now Playing</h2>
@@ -632,8 +636,10 @@ useEffect(() => {
               </div>
             </div>
           )}
-
-          {/* Cast */}
+          {/* Add the TorrentSearch component */}
+          <TorrentSearch title={title} />
+          {/* ... (keep existing Cast, Additional Info, and Similar Movies sections) ... */}
+          
           {item.credits?.cast?.length > 0 && (
             <div className="glass rounded-3xl card-spacing border border-white/10 shadow-2xl animate-slide-up">
               <h2 className="text-2xl sm:text-3xl font-bold mb-8 text-gradient flex items-center gap-3">
