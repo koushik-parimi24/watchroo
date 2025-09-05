@@ -193,6 +193,15 @@ useEffect(() => {
       quality: 'HD',
       ads: 'Minimal',
     },
+    server4: {
+      name: 'VidEasy',
+      url: (tmdbId, mediaType, season, episode) =>
+        mediaType === 'tv'
+          ? `https://player.videasy.net/tv/${tmdbId}/${season}/${episode}`
+          : `https://player.videasy.net/movie/${tmdbId}?overlay=true`,
+      quality: 'HD',
+      ads: 'Minimal',
+    },
   };
 
   const getCurrentStreamUrl = () => {
