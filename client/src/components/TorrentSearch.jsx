@@ -13,7 +13,7 @@ const DownloadIcon = () => (
   </svg>
 );
 
-const TorrentSearch = ({ title }) => {
+const TorrentSearch = ({ title, year }) => {
   const [torrents, setTorrents] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -30,7 +30,11 @@ const TorrentSearch = ({ title }) => {
 
     try {
       // Use the local torrents-api endpoint
-      const response = await fetch(`http://localhost:3000/api/search?searchTerm=${encodeURIComponent(title)}`);
+      const params = new URLSearchParams({
+        searchTerm: title,
+        ...(year && { year: year.toString() })
+      });
+      const response = await fetch(`http://localhost:3000/api/search?${params}`);
       if (!response.ok) {
         const errorText = await response.text().catch(() => 'No error details available');
         throw new Error(`Server returned ${response.status}: ${errorText}`);

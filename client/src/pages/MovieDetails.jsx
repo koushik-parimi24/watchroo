@@ -646,7 +646,6 @@ useEffect(() => {
             </div>
           )}
           {/* Add the TorrentSearch component */}
-          <TorrentSearch title={title} />
           {/* ... (keep existing Cast, Additional Info, and Similar Movies sections) ... */}
           
           {item.credits?.cast?.length > 0 && (
