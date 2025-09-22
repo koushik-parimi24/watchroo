@@ -119,8 +119,8 @@
   body {
     background: #030014;
     background-image: 
-      radial-gradient(circle at 25% 25%, #1e1b4b 0%, transparent 50%),
-      radial-gradient(circle at 75% 75%, #581c87 0%, transparent 50%);
+      radial-gradient(circle at 25% 25%, #456825 0%, transparent 50%),
+      radial-gradient(circle at 75% 75%, #8b2fd6 0%, transparent 50%);
     font-family: "Michroma", sans-serif;
     font-weight: 700;
     font-style: normal;
@@ -267,6 +267,46 @@
   
   .gap-responsive {
     @apply gap-3 sm:gap-4 md:gap-5 lg:gap-6;
+  }
+
+  /* Card view styles */
+  .card-view-grid {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 55% /* For smaller screens, show about 2 cards */;
+    gap: 1rem;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding-bottom: 1rem;
+  }
+  
+  .card-view-grid > * {
+    scroll-snap-align: start;
+  }
+
+  /* Responsive card sizing */
+  @media (min-width: 640px) {
+    .card-view-grid {
+      grid-auto-columns: 33%; /* Show about 3 cards */
+    }
+  }
+  
+  @media (min-width: 768px) {
+    .card-view-grid {
+      grid-auto-columns: 25%; /* Show about 4 cards */
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    .card-view-grid {
+      grid-auto-columns: 20%; /* Show about 5 cards */
+    }
+  }
+  
+  @media (min-width: 1280px) {
+    .card-view-grid {
+      grid-auto-columns: 16.66%; /* Show about 6 cards */
+    }
   }
 
   /* Line clamp utilities for consistent text truncation */

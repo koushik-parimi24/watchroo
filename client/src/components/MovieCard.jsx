@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Bookmark, BookmarkCheck } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useLoading } from '@/context/LoadingContext';
-import './moviecard.css'; // Add this if your styles are in loader.css
+import './moviecard.css';
 
 const MovieCard = ({ movie, isLoading = false }) => {
   const { watchlist, add, remove } = useContext(WatchlistContext);
@@ -16,18 +16,16 @@ const MovieCard = ({ movie, isLoading = false }) => {
 
   if (isLoading || !movie) return <MovieCardSkeleton />;
 
-  const id = movie?.id ?? movie?.media_id;
+  const id = movie?.id ?? movie?.medi-id;
   const mediaType = movie?.media_type ?? (movie?.title ? 'movie' : 'tv');
   const title = movie?.original_title || movie?.original_name || movie?.title || movie?.name;
   const date = movie?.release_date || movie?.first_air_date || 'Unknown';
   const rating = movie?.vote_average ?? 'N/A';
 
   useEffect(() => {
-    const isSaved = watchlist.some((w) => String(w.media_id) === String(movie.id));
+    const isSaved = watchlist.some((w) => String(w.medi-id) === String(movie.id));
     setSaved(isSaved);
   }, [watchlist, movie.id]);
-
-  if (isLoading || !movie) return <MovieCardSkeleton />;
 
   const handleImageLoad = () => setImageLoaded(true);
   const handleImageError = () => {
@@ -77,11 +75,11 @@ const MovieCard = ({ movie, isLoading = false }) => {
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
           </div>
 
-          {/* Content section - Fixed height */}
-          <div className="p-3 sm:p-4 flex-1 flex flex-col justify-between min-h-[120px]">
-            {/* Title section - Fixed height */}
-            <div className="mb-2">
-              <h3 className="text-white font-semibold text-sm sm:text-base leading-tight line-clamp-2 group-hover:text-gradient transition-all duration-300 h-10 overflow-hidden">
+          {/* Content section */}
+          <div className="p-3 sm:p-4 flex-1 flex flex-col justify-between">
+            {/* Title section */}
+            <div className="mb-2 h-10"> {/* Added fixed height for consistency */}
+              <h3 className="text-white font-semibold text-sm sm:text-base leading-tight line-clamp-2 group-hover:text-gradient transition-all duration-300">
                 {title}
               </h3>
             </div>
@@ -92,7 +90,9 @@ const MovieCard = ({ movie, isLoading = false }) => {
                 <span className="truncate">{new Date(date).getFullYear() || 'Unknown'}</span>
                 <div className="flex items-center gap-1 flex-shrink-0">
                   <span className="text-yellow-400">⭐</span>
-                  <span className="text-yellow-300 font-medium">{rating !== 'N/A' ? Number(rating).toFixed(1) : 'N/A'}</span>
+                  <span className="text-yellow-300 font-medium">
+                    {rating !== 'N/A' ? Number(rating).toFixed(1) : 'N/A'}
+                  </span>
                 </div>
               </div>
               
@@ -129,7 +129,7 @@ const MovieCard = ({ movie, isLoading = false }) => {
   );
 };
 
-// Enhanced skeleton component with glassmorphism - Fixed height
+// Enhanced skeleton component with glassmorphism
 const MovieCardSkeleton = () => (
   <motion.div 
     initial={{ opacity: 0 }} 
@@ -140,14 +140,12 @@ const MovieCardSkeleton = () => (
       {/* Image skeleton */}
       <div className="aspect-[2/3] bg-gradient-to-r from-gray-600/30 via-gray-500/30 to-gray-600/30 bg-[length:200%_100%] animate-shimmer flex-shrink-0"></div>
       
-      {/* Content skeleton - Fixed height */}
+      {/* Content skeleton */}
       <div className="p-3 sm:p-4 flex-1 flex flex-col justify-between min-h-[120px]">
         {/* Title skeleton */}
-        <div className="mb-2">
-          <div className="h-10 space-y-1">
-            <div className="h-4 bg-gradient-to-r from-gray-600/30 via-gray-500/30 to-gray-600/30 animate-shimmer rounded w-full"></div>
-            <div className="h-4 bg-gradient-to-r from-gray-600/30 via-gray-500/30 to-gray-600/30 animate-shimmer rounded w-3/4"></div>
-          </div>
+        <div className="mb-2 h-10"> {/* Added fixed height for consistency */}
+          <div className="h-4 bg-gradient-to-r from-gray-600/30 via-gray-500/30 to-gray-600/30 animate-shimmer rounded w-full"></div>
+          <div className="h-4 bg-gradient-to-r from-gray-600/30 via-gray-500/30 to-gray-600/30 animate-shimmer rounded w-3/4 mt-1"></div> {/* Added mt-1 for spacing */}
         </div>
         
         {/* Metadata skeleton */}
@@ -159,11 +157,12 @@ const MovieCardSkeleton = () => (
           <div className="h-6 bg-gradient-to-r from-gray-600/30 via-gray-500/30 to-gray-600/30 animate-shimmer rounded-full w-1/2"></div>
         </div>
       </div>
+      
+      {/* Bookmark skeleton */}
+      <div className="absolute top-2 right-2 w-8 h-8 bg-gradient-to-r from-gray-600/30 via-gray-500/30 to-gray-600/30 animate-shimmer rounded-full"></div>
     </div>
-    
-    {/* Bookmark skeleton */}
-    <div className="absolute top-2 right-2 w-8 h-8 bg-gradient-to-r from-gray-600/30 via-gray-500/30 to-gray-600/30 animate-shimmer rounded-full"></div>
   </motion.div>
 );
 
 export default MovieCard;
+export { MovieCardSkeleton };

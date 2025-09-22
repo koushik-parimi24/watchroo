@@ -9,7 +9,6 @@ import SkeletonGrid from './components/SkeletonGrid';
 import RecentlyWatched from './components/RecentlyWatched'
 import Hero from './components/Hero'
 import ScrollableSection from './components/ScrollableSection'
-import { useInfiniteScroll } from './hooks/useInfiniteScroll'
 
 
 const API_KEY = import.meta.env.VITE_TMDB_API_KEY
@@ -33,6 +32,34 @@ function App() {
   const [tvShows, setTvShows] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
   const [genres, setGenres] = useState([]);
+
+  // New states for additional sections
+  const [popularThisWeekMovies, setPopularThisWeekMovies] = useState([]);
+  const [popularThisWeekTvShows, setPopularThisWeekTvShows] = useState([]);
+  const [trendingMovies, setTrendingMovies] = useState([]);
+  const [trendingTvShows, setTrendingTvShows] = useState([]);
+  const [nowPlayingMovies, setNowPlayingMovies] = useState([]); // Movies only
+
+  // States for genre sections
+  const [actionMovies, setActionMovies] = useState([]);
+  const [actionTvShows, setActionTvShows] = useState([]);
+  const [familyMovies, setFamilyMovies] = useState([]);
+  const [familyTvShows, setFamilyTvShows] = useState([]);
+  const [comedyMovies, setComedyMovies] = useState([]);
+  const [comedyTvShows, setComedyTvShows] = useState([]);
+  const [romanceMovies, setRomanceMovies] = useState([]);
+  const [romanceTvShows, setRomanceTvShows] = useState([]);
+  const [horrorMovies, setHorrorMovies] = useState([]);
+  const [horrorTvShows, setHorrorTvShows] = useState([]);
+  const [crimeMovies, setCrimeMovies] = useState([]);
+  const [crimeTvShows, setCrimeTvShows] = useState([]);
+  const [dramaMovies, setDramaMovies] = useState([]);
+  const [dramaTvShows, setDramaTvShows] = useState([]);
+  const [animationMovies, setAnimationMovies] = useState([]);
+  const [animationTvShows, setAnimationTvShows] = useState([]);
+  const [documentaryMovies, setDocumentaryMovies] = useState([]);
+  const [documentaryTvShows, setDocumentaryTvShows] = useState([]);
+
   const [isFiltering, setIsFiltering] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   
@@ -41,25 +68,11 @@ function App() {
   const [searchLoading, setSearchLoading] = useState(false);
   const [filterLoading, setFilterLoading] = useState(false);
   
-  // Pagination states
-  const [currentPage, setCurrentPage] = useState(1);
-  const [hasMoreMovies, setHasMoreMovies] = useState(true);
-  const [hasMoreTvShows, setHasMoreTvShows] = useState(true);
-  const [hasMoreTopMovies, setHasMoreTopMovies] = useState(true);
-  const [hasMoreTopTvShows, setHasMoreTopTvShows] = useState(true);
-  
-  // Search/Filter pagination
-  const [searchPage, setSearchPage] = useState(1);
-  const [hasMoreSearchResults, setHasMoreSearchResults] = useState(true);
-  
-  // Additional content states for new sections
-  const [additionalMovies, setAdditionalMovies] = useState([]);
-  const [additionalTvShows, setAdditionalTvShows] = useState([]);
-  const [additionalTopMovies, setAdditionalTopMovies] = useState([]);
-  const [additionalTopTvShows, setAdditionalTopTvShows] = useState([]);
-  
-  // Infinite scroll loading state
-  const [infiniteLoadingDisabled, setInfiniteLoadingDisabled] = useState(false);
+  // New state for media type toggle
+  const [mediaType, setMediaType] = useState('movie'); // 'movie' or 'tv'
+
+  // New state for global view mode
+  const [viewMode, setViewMode] = useState('card'); // 'card' or 'list'
   
   // Filter states
   const [filters, setFilters] = useState({
@@ -74,10 +87,12 @@ function App() {
     if(!searchTerm.trim()){
       setIsSearching(false); 
       setIsFiltering(false);
-      setSearchPage(1);
-      setHasMoreSearchResults(true);
+      // Fetch content based on current mediaType
+      if (mediaType === 'movie') {
       fetchMovies();
+      } else {
       fetchTvShows();
+      }
       return;
     }
 
@@ -101,9 +116,6 @@ function App() {
         setMovies(data.results);
       }
       
-      setSearchPage(page);
-      setHasMoreSearchResults(data.page < data.total_pages);
-      
       if(data.results.length === 0 && page === 1){
         setErrorMessage(`No results found for "${searchTerm}"`);
       }else{
@@ -116,13 +128,6 @@ function App() {
       setSearchLoading(false);
     }
   }
-
-  // Load more search results
-  const loadMoreSearchResults = async () => {
-    if (hasMoreSearchResults && searchTerm.trim()) {
-      await handleSearch(searchPage + 1, true);
-    }
-  };
 
   const handleFilter = async (newFilters) => {
     setFilters(newFilters);
@@ -150,8 +155,12 @@ function App() {
     setSearchTerm('');
     setSearchParams({}); // Clear URL params
     setErrorMessage('');
+    // Fetch content based on current mediaType
+    if (mediaType === 'movie') {
     fetchMovies();
+    } else {
     fetchTvShows();
+    }
   };  
   
       // Add genre filter
@@ -263,7 +272,6 @@ function App() {
         setMovies(data.results);
       }
       
-      setHasMoreMovies(data.page < data.total_pages);
     } catch(error){
       console.log(`Error fetching movies:${error}`)
       setErrorMessage('Error fetching movies. Please try again later')
@@ -285,7 +293,6 @@ function App() {
         setTvShows(data.results);
       }
       
-      setHasMoreTvShows(data.page < data.total_pages);
     } catch(error){
       console.log(`Error fetching tv shows:${error}`)
       setErrorMessage('Error fetching tv shows. Please try again later')
@@ -303,7 +310,6 @@ function App() {
         setTopMovies(data.results);
       }
       
-      setHasMoreTopMovies(data.page < data.total_pages);
     }catch(error){
       console.log("Error fetching top movies",error);
     }
@@ -320,9 +326,101 @@ function App() {
         setTopTvShows(data.results);
       }
       
-      setHasMoreTopTvShows(data.page < data.total_pages);
     }catch(error){
       console.log("Error fetching top TV shows",error);
+    }
+  };
+
+  const fetchPopularThisWeek = async (type) => {
+    try {
+      const endpoint = `${API_URL_BASE}/trending/${type}/week`;
+      const response = await fetch(endpoint, API_OPTIONS);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch popular ${type} this week`);
+      }
+    const data = await response.json();
+      if (type === 'movie') {
+        setPopularThisWeekMovies(data.results);
+      } else {
+        setPopularThisWeekTvShows(data.results);
+      }
+    } catch (error) {
+      console.error(`Error fetching popular ${type} this week:`, error);
+    }
+  };
+
+  const fetchTrending = async (type) => {
+    try {
+      const endpoint = `${API_URL_BASE}/trending/${type}/day`;
+      const response = await fetch(endpoint, API_OPTIONS);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch trending ${type}`);
+      }
+    const data = await response.json();
+      if (type === 'movie') {
+        setTrendingMovies(data.results);
+      } else {
+        setTrendingTvShows(data.results);
+      }
+    } catch (error) {
+      console.error(`Error fetching trending ${type}:`, error);
+    }
+  };
+
+  const fetchGenreContent = async (type, genreId, setStateFunction) => {
+    try {
+      const endpoint = `${API_URL_BASE}/discover/${type}?with_genres=${genreId}`;
+      const response = await fetch(endpoint, API_OPTIONS);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch ${type} for genre ${genreId}`);
+      }
+    const data = await response.json();
+      setStateFunction(data.results);
+    } catch (error) {
+      console.error(`Error fetching ${type} for genre ${genreId}:`, error);
+    }
+  };
+
+  const fetchAllGenreContent = async (mediaType) => {
+    const genreMap = new Map(genres.map(genre => [genre.name, genre.id]));
+
+    const genreFetches = [];
+
+    const addGenreFetch = (genreName, movieSetter, tvSetter) => {
+      const genreId = genreMap.get(genreName);
+      if (genreId) {
+        if (mediaType === 'movie') {
+          genreFetches.push(fetchGenreContent('movie', genreId, movieSetter));
+        } else {
+          genreFetches.push(fetchGenreContent('tv', genreId, tvSetter));
+        }
+      }
+    };
+
+    addGenreFetch('Action', setActionMovies, setActionTvShows);
+    addGenreFetch('Family', setFamilyMovies, setFamilyTvShows);
+    addGenreFetch('Comedy', setComedyMovies, setComedyTvShows);
+    addGenreFetch('Romance', setRomanceMovies, setRomanceTvShows);
+    addGenreFetch('Horror', setHorrorMovies, setHorrorTvShows);
+    addGenreFetch('Crime', setCrimeMovies, setCrimeTvShows);
+    addGenreFetch('Drama', setDramaMovies, setDramaTvShows);
+    addGenreFetch('Animation', setAnimationMovies, setAnimationTvShows);
+    addGenreFetch('Documentary', setDocumentaryMovies, setDocumentaryTvShows);
+
+    await Promise.all(genreFetches);
+  };
+
+  const fetchNowPlayingMovies = async () => {
+    try {
+      const endpoint = `${API_URL_BASE}/movie/now_playing`;
+      const response = await fetch(endpoint, API_OPTIONS);
+      if (!response.ok) {
+        throw new Error('Failed to fetch now playing movies');
+      }
+      const data = await response.json();
+      setNowPlayingMovies(data.results);
+    } catch (error) {
+      console.error("Error fetching now playing movies:", error);
     }
   };
 
@@ -338,85 +436,13 @@ function App() {
     setIsSearching(false);
     setSearchTerm('');
     setErrorMessage('');
-    setInfiniteLoadingDisabled(false);
-    setSearchPage(1);
-    setHasMoreSearchResults(true);
-    fetchMovies();
-    fetchTvShows();
-  };
-
-  // Load more functions for new sections
-  const loadMoreMovies = async () => {
-    const nextPage = Math.ceil((movies.length + additionalMovies.length) / 20) + 1;
-    const response = await fetch(`${API_URL_BASE}/movie/popular?page=${nextPage}`, API_OPTIONS);
-    const data = await response.json();
-    setAdditionalMovies(prev => [...prev, ...data.results]);
-    setHasMoreMovies(data.page < data.total_pages);
-  };
-
-  const loadMoreTvShows = async () => {
-    const nextPage = Math.ceil((tvShows.length + additionalTvShows.length) / 20) + 1;
-    const response = await fetch(`${API_URL_BASE}/tv/popular?page=${nextPage}`, API_OPTIONS);
-    const data = await response.json();
-    setAdditionalTvShows(prev => [...prev, ...data.results]);
-    setHasMoreTvShows(data.page < data.total_pages);
-  };
-
-  const loadMoreTopMovies = async () => {
-    const nextPage = Math.ceil((topMovies.length + additionalTopMovies.length) / 20) + 1;
-    const response = await fetch(`${API_URL_BASE}/movie/top_rated?page=${nextPage}`, API_OPTIONS);
-    const data = await response.json();
-    setAdditionalTopMovies(prev => [...prev, ...data.results]);
-    setHasMoreTopMovies(data.page < data.total_pages);
-  };
-
-  const loadMoreTopTvShows = async () => {
-    const nextPage = Math.ceil((topTvShow.length + additionalTopTvShows.length) / 20) + 1;
-    const response = await fetch(`${API_URL_BASE}/tv/top_rated?page=${nextPage}`, API_OPTIONS);
-    const data = await response.json();
-    setAdditionalTopTvShows(prev => [...prev, ...data.results]);
-    setHasMoreTopTvShows(data.page < data.total_pages);
-  };
-
-  // Load more for all sections at once
-  const loadMoreAll = async () => {
-    const promises = [];
-    
-    if (hasMoreMovies) {
-      promises.push(loadMoreMovies());
+    // Fetch content based on current mediaType
+    if (mediaType === 'movie') {
+      fetchMovies();
+    } else {
+      fetchTvShows();
     }
-    
-    if (hasMoreTvShows) {
-      promises.push(loadMoreTvShows());
-    }
-    
-    if (hasMoreTopMovies) {
-      promises.push(loadMoreTopMovies());
-    }
-    
-    if (hasMoreTopTvShows) {
-      promises.push(loadMoreTopTvShows());
-    }
-    
-    await Promise.all(promises);
   };
-
-  // Infinite scroll implementation
-  const hasMoreContent = hasMoreMovies || hasMoreTvShows || hasMoreTopMovies || hasMoreTopTvShows;
-  const shouldEnableInfiniteScroll = !infiniteLoadingDisabled && hasMoreContent && !isSearching && !isFiltering;
-  const shouldEnableSearchScroll = !infiniteLoadingDisabled && hasMoreSearchResults && (isSearching || isFiltering);
-  
-  const { isLoading: isInfiniteLoading } = useInfiniteScroll(
-    loadMoreAll,
-    shouldEnableInfiniteScroll,
-    300 // Trigger when 300px from bottom
-  );
-
-  const { isLoading: isSearchInfiniteLoading } = useInfiniteScroll(
-    isSearching ? loadMoreSearchResults : loadMoreAll,
-    shouldEnableSearchScroll,
-    300 // Trigger when 300px from bottom
-  );
 
   // Check for search parameter in URL on component mount
   useEffect(() => {
@@ -459,6 +485,63 @@ function App() {
     }
   }, []);
 
+  // Refetch data when mediaType changes
+  useEffect(() => {
+    if (!isSearching && !isFiltering) {
+      setInitialLoading(true);
+      const fetchData = async () => {
+        if (mediaType === 'movie') {
+          await Promise.all([
+            fetchMovies(),
+            fetchTopMovies(),
+            fetchPopularThisWeek('movie'),
+            fetchTrending('movie'),
+            fetchNowPlayingMovies(),
+            fetchAllGenreContent('movie'),
+          ]);
+          setTvShows([]);
+          setTopTvShows([]);
+          setPopularThisWeekTvShows([]);
+          setTrendingTvShows([]);
+          setActionTvShows([]);
+          setFamilyTvShows([]);
+          setComedyTvShows([]);
+          setRomanceTvShows([]);
+          setHorrorTvShows([]);
+          setCrimeTvShows([]);
+          setDramaTvShows([]);
+          setAnimationTvShows([]);
+          setDocumentaryTvShows([]);
+
+        } else {
+          await Promise.all([
+            fetchTvShows(),
+            fetchTopTvShows(),
+            fetchPopularThisWeek('tv'),
+            fetchTrending('tv'),
+            fetchAllGenreContent('tv'),
+          ]);
+          setMovies([]);
+          setTopMovies([]);
+          setPopularThisWeekMovies([]);
+          setTrendingMovies([]);
+          setNowPlayingMovies([]);
+          setActionMovies([]);
+          setFamilyMovies([]);
+          setComedyMovies([]);
+          setRomanceMovies([]);
+          setHorrorMovies([]);
+          setCrimeMovies([]);
+          setDramaMovies([]);
+          setAnimationMovies([]);
+          setDocumentaryMovies([]);
+        }
+        setInitialLoading(false);
+      };
+      fetchData();
+    }
+  }, [mediaType, isSearching, isFiltering, genres]);
+
   return (
     <>
 <main>
@@ -482,23 +565,73 @@ function App() {
   {!isSearching && (
     <>
       <Hero
-        showFilters={showFilters}
-        setShowFilters={setShowFilters}
         isFiltering={isFiltering}
         isSearching={isSearching}
         clearFilters={clearFilters}
       />
-      {/* Filters below hero */}
+      {/* Media Type Toggle */}
+      <div className="flex justify-center mb-8 mt-10 ">
+        <div className="bg-gray-800/50 backdrop-blur-md rounded-full p-1 flex space-x-2">
+          <button
+            className={`px-5 py-2 rounded-full text-sm font-medium transition-colors duration-200
+              ${mediaType === 'movie' ? 'bg-blue-600 text-white shadow-lg' : 'text-gray-300 hover:text-white hover:bg-gray-700/70'}`}
+            onClick={() => setMediaType('movie')}
+          >
+            Movies
+          </button>
+          <button
+            className={`px-5 py-2 rounded-full text-sm font-medium transition-colors duration-200
+              ${mediaType === 'tv' ? 'bg-blue-600 text-white shadow-lg' : 'text-gray-300 hover:text-white hover:bg-gray-700/70'}`}
+            onClick={() => setMediaType('tv')}
+          >
+            TV Shows
+          </button>
+        </div>
+        {/* View Mode Toggle */}
+        <div className="flex items-center space-x-2 ml-4">
+          <button
+            onClick={() => setViewMode('card')}
+            className={`p-2 rounded-full transition-colors duration-200 ${viewMode === 'card' ? 'bg-blue-600 text-white' : 'bg-gray-800/50 text-gray-300 hover:bg-gray-700/70'}`}
+            aria-label="Card View"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M3 5a2 2 0 012-2h10a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V5zm1.414.707a1 1 0 00-1.414 1.414L5.586 9H4a1 1 0 100 2h1.586l-1.586 1.586a1 1 0 101.414 1.414L7 12.414V14a1 1 0 102 0v-1.586l1.586 1.586a1 1 0 101.414-1.414L12.414 11H14a1 1 0 100-2h-1.586l1.586-1.586a1 1 0 10-1.414-1.414L10 8.586V7a1 1 0 10-2 0v1.586L5.414 5.707z" clipRule="evenodd" />
+            </svg>
+          </button>
+          <button
+            onClick={() => setViewMode('list')}
+            className={`p-2 rounded-full transition-colors duration-200 ${viewMode === 'list' ? 'bg-blue-600 text-white' : 'bg-gray-800/50 text-gray-300 hover:bg-gray-700/70'}`}
+            aria-label="List View"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
+            </svg>
+          </button>
+        </div>
+        {/* Filter Toggle Button */}
+        <button
+          className={`ml-4 p-3 rounded-full transition-colors duration-200
+            ${showFilters ? 'bg-blue-600 text-white shadow-lg' : 'bg-gray-800/50 text-gray-300 hover:text-white hover:bg-gray-700/70'}`}
+          onClick={() => setShowFilters(prev => !prev)}
+          aria-label="Toggle Filters"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z" clipRule="evenodd" />
+          </svg>
+        </button>
+      </div>
+    </>
+  )}
+
+  {/* Filters section - appears below hero/toggles when active */}
       {showFilters && (
-        <div className="px-4">
+    <div className="px-4 mb-8">
           <FilterPanel
             filters={filters}
             genres={genres}
             onFilterChange={handleFilter}
           />
         </div>
-      )}
-    </>
   )}
 
   {/* Main Content */}
@@ -526,26 +659,8 @@ function App() {
                 loading={false}
                 skeletonCount={12}
                 MovieCardComponent={MovieCard}
+                viewMode={viewMode}
               />
-              
-              {/* Search Infinite Scroll Loading Indicator */}
-              {isSearchInfiniteLoading && (
-                <div className="flex justify-center py-8 animate-fade-in">
-                  <div className="glass-card rounded-2xl px-6 py-4 flex items-center gap-3">
-                    <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                    <span className="text-white font-medium">Loading more results...</span>
-                  </div>
-                </div>
-              )}
-              
-              {/* End of search results indicator */}
-              {!hasMoreSearchResults && movies.length > 0 && !searchLoading && (isSearching || isFiltering) && (
-                <div className="flex justify-center py-8 animate-fade-in">
-                  <div className="glass-subtle rounded-2xl px-6 py-4 text-center">
-                    <span className="text-gray-400">🔍 End of search results</span>
-                  </div>
-                </div>
-              )}
             </>
           )}
         </div>
@@ -555,120 +670,375 @@ function App() {
             <RecentlyWatched />
           </div>
 
-          <div className="animate-slide-up" style={{ animationDelay: '0.1s' }}>
+          {mediaType === 'movie' ? (
+            <>
+              <div className="animate-slide-up" style={{ animationDelay: '0.2s' }}>
+                <ScrollableSection
+                  title="⭐ Top Movies"
+                  items={topMovies}
+                  containerId="top-movies-scroll"
+                  loading={initialLoading}
+                  skeletonCount={8}
+                  MovieCardComponent={MovieCard}
+                  viewMode={viewMode}
+                />
+                  </div>
+
+              {/* Popular This Week Movies */}
+              {popularThisWeekMovies.length > 0 && (
+                <div className="animate-slide-up" style={{ animationDelay: '0.3s' }}>
+                  <ScrollableSection
+                    title="📈 Popular This Week (Movies)"
+                    items={popularThisWeekMovies}
+                    containerId="popular-this-week-movie-scroll"
+                    loading={initialLoading}
+                    skeletonCount={12}
+                    MovieCardComponent={MovieCard}
+                    viewMode={viewMode}
+                  />
+                </div>
+              )}
+              
+              {/* Trending Movies */}
+              {trendingMovies.length > 0 && (
+                <div className="animate-slide-up" style={{ animationDelay: '0.4s' }}>
+                  <ScrollableSection
+                    title="⚡ Trending Movies"
+                    items={trendingMovies}
+                    containerId="trending-movie-scroll"
+                    loading={initialLoading}
+                    skeletonCount={12}
+                    MovieCardComponent={MovieCard}
+                    viewMode={viewMode}
+                  />
+                  </div>
+              )}
+
+              {/* Now Playing Movies */}
+              {nowPlayingMovies.length > 0 && (
+                <div className="animate-slide-up" style={{ animationDelay: '0.5s' }}>
+                  <ScrollableSection
+                    title="🍿 Showing in Cinemas"
+                    items={nowPlayingMovies}
+                    containerId="now-playing-movie-scroll"
+                    loading={initialLoading}
+                    skeletonCount={12}
+                    MovieCardComponent={MovieCard}
+                    viewMode={viewMode}
+                  />
+                </div>
+              )}
+
+              {/* Movie Genre Sections */}
+              {actionMovies.length > 0 && (
+                <div className="animate-slide-up" style={{ animationDelay: '0.6s' }}>
+                  <ScrollableSection
+                    title="💥 Action Movies"
+                    items={actionMovies}
+                    containerId="action-movie-scroll"
+                    loading={initialLoading}
+                    skeletonCount={12}
+                    MovieCardComponent={MovieCard}
+                    viewMode={viewMode}
+                  />
+                </div>
+              )}
+
+              {familyMovies.length > 0 && (
+                <div className="animate-slide-up" style={{ animationDelay: '0.7s' }}>
+                  <ScrollableSection
+                    title="👨‍👩‍👧‍👦 Family Movies"
+                    items={familyMovies}
+                    containerId="family-movie-scroll"
+                    loading={initialLoading}
+                    skeletonCount={12}
+                    MovieCardComponent={MovieCard}
+                    viewMode={viewMode}
+                  />
+        </div>
+              )}
+
+              {comedyMovies.length > 0 && (
+                <div className="animate-slide-up" style={{ animationDelay: '0.8s' }}>
+                  <ScrollableSection
+                    title="😂 Comedy Movies"
+                    items={comedyMovies}
+                    containerId="comedy-movie-scroll"
+                    loading={initialLoading}
+                    skeletonCount={12}
+                    MovieCardComponent={MovieCard}
+                    viewMode={viewMode}
+                  />
+          </div>
+              )}
+
+              {romanceMovies.length > 0 && (
+                <div className="animate-slide-up" style={{ animationDelay: '0.9s' }}>
             <ScrollableSection
-              title="🔥 Popular Movies"
-              items={movies}
-              containerId="popular-movies-scroll"
+                    title="❤️ Romance Movies"
+                    items={romanceMovies}
+                    containerId="romance-movie-scroll"
               loading={initialLoading}
               skeletonCount={12}
               MovieCardComponent={MovieCard}
+              viewMode={viewMode}
             />
           </div>
+              )}
 
-          <div className="animate-slide-up" style={{ animationDelay: '0.2s' }}>
+              {horrorMovies.length > 0 && (
+                <div className="animate-slide-up" style={{ animationDelay: '1.0s' }}>
             <ScrollableSection
-              title="⭐ Top Movies"
-              items={topMovies}
-              containerId="top-movies-scroll"
+                    title="👻 Horror Movies"
+                    items={horrorMovies}
+                    containerId="horror-movie-scroll"
               loading={initialLoading}
-              skeletonCount={8}
+                    skeletonCount={12}
               MovieCardComponent={MovieCard}
+              viewMode={viewMode}
             />
           </div>
+              )}
 
+              {crimeMovies.length > 0 && (
+                <div className="animate-slide-up" style={{ animationDelay: '1.1s' }}>
+                  <ScrollableSection
+                    title="🔪 Crime Movies"
+                    items={crimeMovies}
+                    containerId="crime-movie-scroll"
+                    loading={initialLoading}
+                    skeletonCount={12}
+                    MovieCardComponent={MovieCard}
+                    viewMode={viewMode}
+                  />
+                </div>
+              )}
+
+              {dramaMovies.length > 0 && (
+                <div className="animate-slide-up" style={{ animationDelay: '1.2s' }}>
+                  <ScrollableSection
+                    title="🎭 Drama Movies"
+                    items={dramaMovies}
+                    containerId="drama-movie-scroll"
+                    loading={initialLoading}
+                    skeletonCount={12}
+                    MovieCardComponent={MovieCard}
+                    viewMode={viewMode}
+                  />
+                </div>
+              )}
+
+              {animationMovies.length > 0 && (
+                <div className="animate-slide-up" style={{ animationDelay: '1.3s' }}>
+                  <ScrollableSection
+                    title="🎨 Animation Movies"
+                    items={animationMovies}
+                    containerId="animation-movie-scroll"
+                    loading={initialLoading}
+                    skeletonCount={12}
+                    MovieCardComponent={MovieCard}
+                    viewMode={viewMode}
+                  />
+                </div>
+              )}
+
+              {documentaryMovies.length > 0 && (
+                <div className="animate-slide-up" style={{ animationDelay: '1.4s' }}>
+                  <ScrollableSection
+                    title="🌍 Documentary Movies"
+                    items={documentaryMovies}
+                    containerId="documentary-movie-scroll"
+                    loading={initialLoading}
+                    skeletonCount={12}
+                    MovieCardComponent={MovieCard}
+                    viewMode={viewMode}
+                  />
+                </div>
+              )}
+            </>
+          ) : (
+            <>
           <div className="animate-slide-up" style={{ animationDelay: '0.3s' }}>
             <ScrollableSection
-              title="📺 Top TV Shows"
+                  title="📺 Popular TV Shows"
+                  items={tvShows}
+                  containerId="popular-tv-scroll"
+                  loading={initialLoading}
+                  skeletonCount={12}
+                  MovieCardComponent={MovieCard}
+                  viewMode={viewMode}
+                />
+              </div>
+
+              <div className="animate-slide-up" style={{ animationDelay: '0.4s' }}>
+                <ScrollableSection
+                  title="⭐ Top TV Shows"
               items={topTvShow}
               containerId="top-tv-scroll"
               loading={initialLoading}
               skeletonCount={8}
               MovieCardComponent={MovieCard}
+              viewMode={viewMode}
             />
           </div>
 
-          <div className="animate-slide-up" style={{ animationDelay: '0.4s' }}>
+              {/* Popular This Week TV Shows */}
+              {popularThisWeekTvShows.length > 0 && (
+                <div className="animate-slide-up" style={{ animationDelay: '0.5s' }}>
             <ScrollableSection
-              title="🍿 Popular TV Shows"
-              items={tvShows}
-              containerId="popular-tv-scroll"
+                    title="📈 Popular This Week (TV Shows)"
+                    items={popularThisWeekTvShows}
+                    containerId="popular-this-week-tv-scroll"
               loading={initialLoading}
               skeletonCount={12}
               MovieCardComponent={MovieCard}
+              viewMode={viewMode}
             />
           </div>
+              )}
 
-          {/* Infinite Scroll Loading Indicator */}
-          {isInfiniteLoading && (
-            <div className="flex justify-center py-8 animate-fade-in">
-              <div className="glass-card rounded-2xl px-6 py-4 flex items-center gap-3">
-                <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                <span className="text-white font-medium">Loading more content...</span>
+              {/* Trending TV Shows */}
+              {trendingTvShows.length > 0 && (
+                <div className="animate-slide-up" style={{ animationDelay: '0.6s' }}>
+                  <ScrollableSection
+                    title="⚡ Trending TV Shows"
+                    items={trendingTvShows}
+                    containerId="trending-tv-scroll"
+                    loading={initialLoading}
+                    skeletonCount={12}
+                    MovieCardComponent={MovieCard}
+                    viewMode={viewMode}
+                  />
               </div>
+              )}
+
+              {/* TV Show Genre Sections */}
+              {actionTvShows.length > 0 && (
+                <div className="animate-slide-up" style={{ animationDelay: '0.7s' }}>
+                  <ScrollableSection
+                    title="💥 Action TV Shows"
+                    items={actionTvShows}
+                    containerId="action-tv-scroll"
+                    loading={initialLoading}
+                    skeletonCount={12}
+                    MovieCardComponent={MovieCard}
+                    viewMode={viewMode}
+                  />
             </div>
           )}
           
-          {/* End of content indicator */}
-          {!hasMoreContent && !initialLoading && (
-            <div className="flex justify-center py-8 animate-fade-in">
-              <div className="glass-subtle rounded-2xl px-6 py-4 text-center">
-                <span className="text-gray-400">🎬 You've reached the end of our collection</span>
+              {familyTvShows.length > 0 && (
+                <div className="animate-slide-up" style={{ animationDelay: '0.8s' }}>
+                  <ScrollableSection
+                    title="👨‍👩‍👧‍👦 Family TV Shows"
+                    items={familyTvShows}
+                    containerId="family-tv-scroll"
+                    loading={initialLoading}
+                    skeletonCount={12}
+                    MovieCardComponent={MovieCard}
+                    viewMode={viewMode}
+                  />
               </div>
+              )}
+
+              {comedyTvShows.length > 0 && (
+                <div className="animate-slide-up" style={{ animationDelay: '0.9s' }}>
+                  <ScrollableSection
+                    title="😂 Comedy TV Shows"
+                    items={comedyTvShows}
+                    containerId="comedy-tv-scroll"
+                    loading={initialLoading}
+                    skeletonCount={12}
+                    MovieCardComponent={MovieCard}
+                    viewMode={viewMode}
+                  />
             </div>
           )}
 
-          {/* Additional Sections */}
-          {additionalMovies.length > 0 && (
-            <div className="animate-slide-up">
+              {romanceTvShows.length > 0 && (
+                <div className="animate-slide-up" style={{ animationDelay: '1.0s' }}>
               <ScrollableSection
-                title="🎬 More Popular Movies"
-                items={additionalMovies}
-                containerId="additional-movies-scroll"
-                loading={false}
+                    title="❤️ Romance TV Shows"
+                    items={romanceTvShows}
+                    containerId="romance-tv-scroll"
+                    loading={initialLoading}
                 skeletonCount={12}
                 MovieCardComponent={MovieCard}
+                viewMode={viewMode}
               />
             </div>
           )}
 
-          {additionalTopMovies.length > 0 && (
-            <div className="animate-slide-up">
+              {horrorTvShows.length > 0 && (
+                <div className="animate-slide-up" style={{ animationDelay: '1.1s' }}>
               <ScrollableSection
-                title="🏆 More Top Movies"
-                items={additionalTopMovies}
-                containerId="additional-top-movies-scroll"
-                loading={false}
-                skeletonCount={8}
+                    title="👻 Horror TV Shows"
+                    items={horrorTvShows}
+                    containerId="horror-tv-scroll"
+                    loading={initialLoading}
+                    skeletonCount={12}
                 MovieCardComponent={MovieCard}
+                viewMode={viewMode}
               />
             </div>
           )}
 
-          {additionalTopTvShows.length > 0 && (
-            <div className="animate-slide-up">
+              {crimeTvShows.length > 0 && (
+                <div className="animate-slide-up" style={{ animationDelay: '1.2s' }}>
               <ScrollableSection
-                title="🏅 More Top TV Shows"
-                items={additionalTopTvShows}
-                containerId="additional-top-tv-scroll"
-                loading={false}
-                skeletonCount={8}
+                    title="🔪 Crime TV Shows"
+                    items={crimeTvShows}
+                    containerId="crime-tv-scroll"
+                    loading={initialLoading}
+                    skeletonCount={12}
                 MovieCardComponent={MovieCard}
+                viewMode={viewMode}
               />
             </div>
           )}
 
-          {additionalTvShows.length > 0 && (
-            <div className="animate-slide-up">
+              {dramaTvShows.length > 0 && (
+                <div className="animate-slide-up" style={{ animationDelay: '1.3s' }}>
               <ScrollableSection
-                title="📺 More Popular TV Shows"
-                items={additionalTvShows}
-                containerId="additional-tv-scroll"
-                loading={false}
+                    title="🎭 Drama TV Shows"
+                    items={dramaTvShows}
+                    containerId="drama-tv-scroll"
+                    loading={initialLoading}
                 skeletonCount={12}
                 MovieCardComponent={MovieCard}
+                viewMode={viewMode}
               />
             </div>
+          )}
+
+              {animationTvShows.length > 0 && (
+                <div className="animate-slide-up" style={{ animationDelay: '1.4s' }}>
+                  <ScrollableSection
+                    title="🎨 Animation TV Shows"
+                    items={animationTvShows}
+                    containerId="animation-tv-scroll"
+                    loading={initialLoading}
+                    skeletonCount={12}
+                    MovieCardComponent={MovieCard}
+                    viewMode={viewMode}
+                  />
+                </div>
+              )}
+
+              {documentaryTvShows.length > 0 && (
+                <div className="animate-slide-up" style={{ animationDelay: '1.5s' }}>
+                  <ScrollableSection
+                    title="🌍 Documentary TV Shows"
+                    items={documentaryTvShows}
+                    containerId="documentary-tv-scroll"
+                    loading={initialLoading}
+                    skeletonCount={12}
+                    MovieCardComponent={MovieCard}
+                    viewMode={viewMode}
+                  />
+                </div>
+              )}
+            </>
           )}
         </div>
       )}
